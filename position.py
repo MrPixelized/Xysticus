@@ -1,6 +1,7 @@
 from random import random
 from copy import deepcopy, copy
 import numpy as np
+import graphics
 
 """SQUARE-PIECE VALUES:
     0: empty
@@ -32,24 +33,6 @@ STANDARD_POSITION = [
   [-2,-1,0,0,0,0,1,2],
   [-4,-1,0,0,0,0,1,4]
 ]
-
-PIECE_REPRESENTATIONS = {
-   0:" ",
-   1: "P",
-   2: "N",
-   3: "B",
-   4: "R",
-   5: "Q",
-   6: "K",
-   7: "E",
-  -1: "p",
-  -2: "n",
-  -3: "b",
-  -4: "r",
-  -5: "q",
-  -6: "k",
-  -7: "e"
-}
 
 MOVE_DIRECTIONS = {
   -6: [(1,1),(-1,1),(-1,-1),(1,-1),(0,1),(0,-1),(1,0),(-1,0),(2,0),(-2,0)],
@@ -158,35 +141,8 @@ class Position():
     return self.squareArray == other.squareArray and self.toMove == other.toMove
     
   def __str__(self):
-    toString = ""
-    # If we add the top line, the middle part, and the bottom line, we get the board.
-    return self._printTopLine() + "\n" + self._printMiddlePart() + "\n" + self._printBottomLine()
-  def _printTopLine(self):
-    # Printing the top line of the board, which is something like this: ┌─┬─┬─┬─┬─┬─┬─┬─┐
-    return borderGraphics["top left corner"] + 7 * (borderGraphics["horizontal"] + borderGraphics["top split edge"]) + borderGraphics["horizontal"] + borderGraphics["top right corner"]
-  def _printMiddleLine(self):
-    # Printing a middle line of the board, which is something like this: ├─┼─┼─┼─┼─┼─┼─┼─┤
-    return "\n" + borderGraphics["left split edge"] + 7 * (borderGraphics["horizontal"] + borderGraphics["crosspoint"]) + borderGraphics["horizontal"] + borderGraphics["right split edge"] + "\n"
-  def _printMiddlePart(self):
-    # The middle part is each row of pieces, all separated by middle lines.
-    i = 0
-    toString = ""
-    for rank in self._turnedBoard():
-      i += 1
-      # Each piece row exists of 9 vertical bars, with the pieces in between them.
-      toString += borderGraphics["vertical"]
-      for square in rank:
-        toString += PIECE_REPRESENTATIONS[square] + borderGraphics["vertical"]
-      if not i == 8:
-        # The final row does not need a middle line.
-        toString += self._printMiddleLine()
-    return toString
-
-  def _printBottomLine(self):
-    # Printing the bottom line of the board, which is like this: └─┴─┴─┴─┴─┴─┴─┴─┘
-    return borderGraphics["bottom left corner"] + 7 * (borderGraphics["horizontal"] + borderGraphics["bottom split edge"]) + borderGraphics["horizontal"] + borderGraphics["bottom right corner"]
-  def _turnedBoard(self):
-    return ([[y[x] for y in self.squareArray] for x in range(8)])
+    # Call an external function from graphics.py
+    return graphics.drawPosition(self.squareArray)
     
   def _convertPositionToString(self):
     # Flatten the position to one dimension
@@ -256,10 +212,6 @@ def flattenToOneDimension(twoDimensionalArray):
   # Take a two dimensional array and zip all of the internal lists together to form one one dimensional array
   return [y for x in twoDimensionalArray for y in x]
 
-def rotateTwoDimensionalArray(twoDimensionalArray):
-  # Take a two dimensional array and rotate it 90 degrees anticlockwise
-  return [[x[y] for x in twoDimensionalArray] for y in range(len(twoDimensionalArray))]
-
 def evaluationNetwork(position):
   inputs = position._convertToInputs()
   return random()
@@ -280,5 +232,3 @@ while True:
     print(currentPosition)
   else:
     print("Unknown command: %s" % (strInput[0]))
-    
-    
