@@ -1,6 +1,7 @@
 from random import random
 from copy import deepcopy, copy
 import numpy as np
+import graphics
 
 """SQUARE-PIECE VALUES:
     0: empty
@@ -181,15 +182,7 @@ class Position():
     return self.squareArray == other.squareArray and self.toMove == other.toMove
     
   def __str__(self):
-    # Rotate the board by 90 degrees anticlockwise, to return to the way humans typically look at a chess board
-    boardArray = rotateTwoDimensionalArray(self.squareArray)
-    # Replace each element of the board with the fitting piece representation, also, append "\n" to each row
-    for x in range(len(boardArray)):
-      for y, piece in enumerate(boardArray[x]):
-        boardArray[x][y] = _convertIdToRepresentation(piece)
-      boardArray[x].append("\n")
-    # Flatten the array, convert it to a string and return
-    return "".join(flattenToOneDimension(boardArray))
+   return graphics.drawPosition(self.squareArray)
     
   def _convertPositionToString(self):
     # Flatten the position to one dimension
