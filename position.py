@@ -158,15 +158,35 @@ class Position():
     return self.squareArray == other.squareArray and self.toMove == other.toMove
     
   def __str__(self):
-    # Rotate the board by 90 degrees anticlockwise, to return to the way humans typically look at a chess board
-    boardArray = rotateTwoDimensionalArray(self.squareArray)
-    # Replace each element of the board with the fitting piece representation, also, append "\n" to each row
-    for x in range(len(boardArray)):
-      for y, piece in enumerate(boardArray[x]):
-        boardArray[x][y] = _convertIdToRepresentation(piece)
-      boardArray[x].append("\n")
-    # Flatten the array, convert it to a string and return
-    return "".join(flattenToOneDimension(boardArray))
+    toString = ""
+    # If we add the top line, the middle part, and the bottom line, we get the board.
+    return self._printTopLine() + "\n" + self._printMiddlePart() + "\n" + self._printBottomLine()
+  def _printTopLine(self):
+    # Printing the top line of the board, which is something like this: ┌─┬─┬─┬─┬─┬─┬─┬─┐
+    return borderGraphics["top left corner"] + 7 * (borderGraphics["horizontal"] + borderGraphics["top split edge"]) + borderGraphics["horizontal"] + borderGraphics["top right corner"]
+  def _printMiddleLine(self):
+    # Printing a middle line of the board, which is something like this: ├─┼─┼─┼─┼─┼─┼─┼─┤
+    return "\n" + borderGraphics["left split edge"] + 7 * (borderGraphics["horizontal"] + borderGraphics["crosspoint"]) + borderGraphics["horizontal"] + borderGraphics["right split edge"] + "\n"
+  def _printMiddlePart(self):
+    # The middle part is each row of pieces, all separated by middle lines.
+    i = 0
+    toString = ""
+    for rank in self._turnedBoard():
+      i += 1
+      # Each piece row exists of 9 vertical bars, with the pieces in between them.
+      toString += borderGraphics["vertical"]
+      for square in rank:
+        toString += PIECE_REPRESENTATIONS[square] + borderGraphics["vertical"]
+      if not i == 8:
+        # The final row does not need a middle line.
+        toString += self._printMiddleLine()
+    return toString
+
+  def _printBottomLine(self):
+    # Printing the bottom line of the board, which is like this: └─┴─┴─┴─┴─┴─┴─┴─┘
+    return borderGraphics["bottom left corner"] + 7 * (borderGraphics["horizontal"] + borderGraphics["bottom split edge"]) + borderGraphics["horizontal"] + borderGraphics["bottom right corner"]
+  def _turnedBoard(self):
+    return ([[y[x] for y in self.squareArray] for x in range(8)])
     
   def _convertPositionToString(self):
     # Flatten the position to one dimension
@@ -248,5 +268,17 @@ a = Position()
 
 for p in a.generatePositions():
   print(p)
+
+while True:
+  strInput = input().split(" ")
+  if strInput[0] == "uci":
+    print("""id name Xysticus\nid author Ischa Abraham, Jeroen van den Berg""")
+  elif strInput[0] == "go":
+    moveFirst, moveLast = findMove(currentPosition)
+    currentPosition = currentPosition.makeMove()
+  elif strInput[0] == "print":
+    print(currentPosition)
+  else:
+    print("Unknown command: %s" % (strInput[0]))
     
     
