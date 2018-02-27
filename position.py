@@ -269,10 +269,6 @@ def flattenToOneDimension(twoDimensionalArray):
   # Take a two dimensional array and zip all of the internal lists together to form one one dimensional array
   return [y for x in twoDimensionalArray for y in x]
 
-def rotateTwoDimensionalArray(twoDimensionalArray):
-  # Take a two dimensional array and rotate it 90 degrees anticlockwise
-  return [[x[y] for x in twoDimensionalArray] for y in range(len(twoDimensionalArray))]
-
 def evaluationNetwork(position):
   inputs = position._convertToInputs()
   return random()
