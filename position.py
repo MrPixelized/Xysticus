@@ -1,5 +1,6 @@
 from random import random
 from copy import deepcopy, copy
+from threading import Thread
 import numpy as np
 import graphics
 import neuralnet
@@ -38,24 +39,6 @@ STANDARD_POSITION = [
   [-4,-1,0,0,0,0,1,4]
 ]
 
-PIECE_REPRESENTATIONS = {
-   0:" ",
-   1: "P",
-   2: "N",
-   3: "B",
-   4: "R",
-   5: "Q",
-   6: "K",
-   7: "E",
-  -1: "p",
-  -2: "n",
-  -3: "b",
-  -4: "r",
-  -5: "q",
-  -6: "k",
-  -7: "e"
-}
-
 MOVE_DIRECTIONS = {
   -6: [(1,1),(-1,1),(-1,-1),(1,-1),(0,1),(0,-1),(1,0),(-1,0),(2,0),(-2,0)],
   -5: [(1,1),(-1,1),(-1,-1),(1,-1),(0,1),(0,-1),(1,0),(-1,0)],
@@ -77,21 +60,26 @@ class Position():
     self.toMove = toMove
     self.fiftyMoveProximity = fiftyMoveProximity
     self.castlingRights = castlingRights
-    
+
   def findBestMove(self, depth):
-    # Generate all possible positions
+    finalEvaluation = self.toMove # This is a good starting value, given that the evaluation always lands between -1 and 1
     for position, move in self.generatePositions():
-    # If depth > 1, call findBestMove on every yielded position, decrease depth by one
-      if depth > 1:
-        position.findBestMove(depth - 1)
-    # Else, evaluate all of the yielded positions
+      if position._kingNotInPosition():
+        return False
+      if depth <= 1:
+        return neuralnet.evaluationNetwork(position)
       else:
-        evaluation = neuralnet.evaluationNetwork(position)
-        if evaluation > bestEvaluation:
-          bestEvaluation, bestMove = evaluation, move
-    # From these positions, return the highest value if it's the engine to play
-    # else return the the lowest value
-    # In both cases return the move made
+         evaluation = position.findBestMove(depth-1)
+      if evaluation == False:
+        print("This position will never be played")
+        continue
+      if position.toMove == 1 and evaluation > finalEvaluation:
+        finalEvaluation = evaluation
+        finalPosition = position
+      elif position.toMove == -1 and evaluation < finalEvaluation:
+        finalEvaluation = evaluation
+        finalPosition = position
+    return finalEvaluation
     
   def generatePositions(self):
     # Iterate through all of the squares on the board
@@ -106,7 +94,7 @@ class Position():
               break
             # If the move is possible, yield the position that would arise
             else:
-              yield self.makeMove(x, y, x + move[0]*n, y + move[1]*n)
+              yield self.makeMove(x, y, x + move[0]*n, y + move[1]*n), (x, y, x + move[0]*n, y + move[1]*n)
             # If the piece is a king, a knight or a pawn (all pieces that move only once in every direction)
             # break from the loop, else, keep making the same move until it is no longer legal
             if _isKing(squareContent) or _isKnight(squareContent) or _isPawn(squareContent):
@@ -170,7 +158,7 @@ class Position():
       newFiftyMoveProximity = 0
       # If a pawn wants to move forward by two squares, the en passant square is put in
       if y - moveY == -2:
-        newSquareArray[x][y+1] = 7
+        newSquareArray[x][y+1] = -7
       elif y - moveY == 2:
         newSquareArray[x][y-1] = 7
 
@@ -184,6 +172,12 @@ class Position():
     
   def __str__(self):
    return graphics.drawPosition(self.squareArray)
+
+  def _kingNotInPosition(self):
+    P = flattenToOneDimension(self.squareArray)
+    if not 6 in P or not -6 in P:
+      return True
+    return False
     
   def _convertPositionToString(self):
     # Flatten the position to one dimension
@@ -272,8 +266,4 @@ def flattenToOneDimension(twoDimensionalArray):
   
 a = Position()
 
-for p in a.generatePositions():
-  print(p)
-  pass
-    
-    
+print(a.findBestMove(5))
