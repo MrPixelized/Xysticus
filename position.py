@@ -2,6 +2,7 @@ from random import random
 from copy import deepcopy, copy
 import numpy as np
 import graphics
+import neuralnet
 
 """SQUARE-PIECE VALUES:
     0: empty
@@ -85,7 +86,7 @@ class Position():
         position.findBestMove(depth - 1)
     # Else, evaluate all of the yielded positions
       else:
-        evaluation = evaluationNetwork(position)
+        evaluation = neuralnet.evaluationNetwork(position)
         if evaluation > bestEvaluation:
           bestEvaluation, bestMove = evaluation, move
     # From these positions, return the highest value if it's the engine to play
@@ -268,10 +269,6 @@ def _convertIdToRepresentation(id):
 def flattenToOneDimension(twoDimensionalArray):
   # Take a two dimensional array and zip all of the internal lists together to form one one dimensional array
   return [y for x in twoDimensionalArray for y in x]
-
-def evaluationNetwork(position):
-  inputs = position._convertToInputs()
-  return random()
   
 a = Position()
 
