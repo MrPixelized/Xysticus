@@ -1,3 +1,5 @@
+from defs import _turnedBoard
+
 PIECE_REPRESENTATIONS = {
   0:" ",
   1:"P",
@@ -49,7 +51,7 @@ def _printMiddlePart(squareArray):
     # Each piece row exists of 9 vertical bars, with the pieces in between them.
     toString += BORDER_GRAPHICS["vertical"]
     for square in rank:
-      toString += PIECE_REPRESENTATIONS[square] + BORDER_GRAPHICS["vertical"]
+      toString += _convertIdToRepresentation(square) + BORDER_GRAPHICS["vertical"]
     if not i == 8:
       # The final row does not need a middle line.
       toString += _printMiddleLine()
@@ -57,5 +59,5 @@ def _printMiddlePart(squareArray):
 def _printBottomLine():
   # Printing the bottom line of the board, which is something like this: └─┴─┴─┴─┴─┴─┴─┴─┘
   return BORDER_GRAPHICS["bottom left corner"] + 7 * (BORDER_GRAPHICS["horizontal"] + BORDER_GRAPHICS["bottom split edge"]) + BORDER_GRAPHICS["horizontal"] + BORDER_GRAPHICS["bottom right corner"]
-def _turnedBoard(squareArray):
-  return ([[y[x] for y in squareArray] for x in range(8)])
+def _convertIdToRepresentation(id):
+  return PIECE_REPRESENTATIONS[id]
