@@ -1,5 +1,6 @@
 from random import random
 from copy import deepcopy, copy
+from threading import Thread
 import numpy as np
 import graphics
 import neuralnet
@@ -21,11 +22,11 @@ import neuralnet
 
 """CASTLING RIGHTS REPRESENTATION:
     Permanent castling rights are represented as a tuple of four binary values, ordered as follows:
-      (White's short castling right, 
-      White's long castling right,
-      Black's short castling right,
-      Black's long castling right)
-    True values indicate the presence of the right, False values indicate the opposite"""
+      (Whites short castling rights, 
+      Blacks short castling rights,
+      Whites long castling rights,
+      Blacks long castling rights)
+    True values indicate the presence of the right, false values indicate the opposite"""
 
 STANDARD_POSITION = [
   [-4,-1,0,0,0,0,1,4],
@@ -60,25 +61,31 @@ class Position():
     self.fiftyMoveProximity = fiftyMoveProximity
     self.castlingRights = castlingRights
 
-  def findBestMove(self, depth):
-    finalEvaluation = self.toMove # This is a good starting value, given that the evaluation always lands between -1 and 1
-    for position, move in self.generatePositions():
-      if position._kingNotInPosition():
-        return False
-      if depth <= 1:
-        return neuralnet.evaluationNetwork(position)
-      else:
-        evaluation = position.findBestMove(depth - 1)
-      if evaluation == False:
-        print("This position will never be played")
-        continue
-      if position.toMove == 1 and evaluation > finalEvaluation:
-        finalEvaluation = evaluation
-        finalPosition = position
-      elif position.toMove == -1 and evaluation < finalEvaluation:
-        finalEvaluation = evaluation
-        finalPosition = position
-    return finalEvaluation
+  def findBestMove(self, depth, alpha, beta):
+    bestEvaluation = 2*self.toMove # This is a good starting value, given that the evaluation always lands between -1 and 1
+    if self.toMove == -1: # Maximizing player (assumed white, later CPU)
+      for position, move in self.generatePositions():
+        if depth > 1:
+          evaluation = position.findBestMove(depth-1, alpha, beta)
+        else:
+          evaluation = neuralnet.evaluationNetwork(position)
+        bestEvaluation = max(bestEvaluation, evaluation)
+        alpha = max(bestEvaluation, alpha)
+        if beta <= alpha:
+          break
+
+    else: # Minimizing player
+      for position, move in self.generatePositions():
+        if depth > 1:
+          evaluation = position.findBestMove(depth-1, alpha, beta)
+        else:
+          evaluation = neuralnet.evaluationNetwork(position)
+        bestEvaluation = min(bestEvaluation, evaluation)
+        beta = min(bestEvaluation, beta)
+        if beta <= alpha:
+          break
+
+    return bestEvaluation
     
   def generatePositions(self):
     # Iterate through all of the squares on the board
@@ -107,8 +114,7 @@ class Position():
     newSquareArray = deepcopy(self.squareArray)
     newCastlingRights = copy(self.castlingRights)
     newColorToMove = self.toMove * -1
-    # Every move, 1 is added to the fity move proximity.
-    newFiftyMoveProximity = copy(self.fiftyMoveProximity) + 1
+    newFiftyMoveProximity = copy(self.fiftyMoveProximity)
     # If the square to move to is a piece, the fifty move proximity is reset
     if _isPiece(squareToMoveTo): newFiftyMoveProximity = 0
     # Then, exceptional moves are handled
@@ -117,7 +123,7 @@ class Position():
     if _isKing(pieceToMove):
       # If the king wants to castle, the rook is moved in advance
       if pieceToMove < 0: # Black
-        newCastlingRights[2], newCastlingRights[3] = False, False
+        newCastlingRights[1], newCastlingRights[3] = False, False
         if x - moveX == -2: # Shorthand castling
           newSquareArray[x+1][0] = -4
           newSquareArray[0][0] = 0
@@ -125,7 +131,7 @@ class Position():
           newSquareArray[x-1][0] = -4
           newSquareArray[0][0] = 0
       elif pieceToMove > 0: # White
-        newCastlingRights[0], newCastlingRights[1] = False, False
+        newCastlingRights[0], newCastlingRights[2] = False, False
         if x - moveX == -2: # Shorthand castling
           newSquareArray[x+1][7] = 4
           newSquareArray[7][7] = 0
@@ -137,9 +143,9 @@ class Position():
         if x == 0 and y == 0:
           newCastlingRights[3] = False
         if x == 7 and y == 0:
-          newCastlingRights[2] = False
-        if x == 0 and y == 7:
           newCastlingRights[1] = False
+        if x == 0 and y == 7:
+          newCastlingRights[2] = False
         if x == 7 and y == 7:
           newCastlingRights[0] = False
 
@@ -216,7 +222,7 @@ class Position():
       # If the piece to move is a king, test if the move to be made is a castling move
       if pieceToMove < 0: # Black castling
         if x-moveX == 2: # Short castling
-          if not self.squareArray[5][0] == 0 or not self.squareArray[6][0] == 0 or not self.castlingRights[2]:
+          if not self.squareArray[5][0] == 0 or not self.squareArray[6][0] == 0 or not self.castlingRights[1]:
             return False
         if x-moveX == -2: # Long castling
           if not self.squareArray[1][0] == 0 or not self.squareArray[2][0] == 0 or not self.squareArray[3][0] == 0 or not self.castlingRights[3]:
@@ -226,10 +232,10 @@ class Position():
           if not self.squareArray[5][7] == 0 or not self.squareArray[6][7] == 0 or not self.castlingRights[0]:
             return False
         if x-moveX == -2: # Long castling
-          if not self.squareArray[1][7] == 0 or not self.squareArray[2][7] == 0 or not self.squareArray[3][7] == 0 or not self.castlingRights[1]:
+          if not self.squareArray[1][7] == 0 or not self.squareArray[2][7] == 0 or not self.squareArray[3][7] == 0 or not self.castlingRights[2]:
             return False
 
-    # Finally, evaluate if the move doesn't land a piece on a square containing a friendly piece.
+    # Finally, evaluate if the move doesn't land a piece on a friendly square
     return colorIndication <= 0
   
   def _convertToInputs(self):
@@ -256,7 +262,14 @@ def _isRook(squareContent):
 
 def _isKnight(squareContent):
   return abs(squareContent) == 2
+  
+def _convertIdToRepresentation(id):
+  return PIECE_REPRESENTATIONS[id]
     
 def flattenToOneDimension(twoDimensionalArray):
   # Take a two dimensional array and zip all of the internal lists together to form one one dimensional array
   return [y for x in twoDimensionalArray for y in x]
+
+if __name__ == "__main__":
+  a = Position()
+  print(a.findBestMove(2, -3, 3))
