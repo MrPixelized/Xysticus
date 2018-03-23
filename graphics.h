@@ -1,5 +1,6 @@
 #include <unordered_map>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -21,16 +22,36 @@ unordered_map<int, char> PIECE_REPRESENTATIONS({
 	{-7, ' '}  
 });
 
-unordered_map<string, char> BORDER_GRAPHICS({
+unordered_map<string, wchar_t> BORDER_GRAPHICS({
+    {"top left corner", '┌'},
+    {"top right corner", '┐'},
+    {"bottom left corner", '└'},
+    {"bottom right corner", '┘'},
+    {"crosspoint", '┼'},
+    {"top split edge", '┬'},
+    {"bottom split edge", '┴'},
+    {"left split edge", '├'},
+    {"right split edge", '┤'},
+    {"horizontal", '─'},
+    {"vertical", '│'}
 });
 
+/*
 string drawPosition(int squareArray[]):
   // If we add the top line, the middle part, and the bottom line, we get the board.
   return _printTopLine() + "\n" + _printMiddlePart(squareArray) + "\n" + _printBottomLine() 
  
+string _printTopLine() {
+  // Printing the top line of the board, which is something like this: ┌─┬─┬─┬─┬─┬─┬─┬─┐
+  // return BORDER_GRAPHICS["top left corner"] + 7 * (BORDER_GRAPHICS["horizontal"] + BORDER_GRAPHICS["top split edge"]) + BORDER_GRAPHICS["horizontal"] + BORDER_GRAPHICS["top right corner"]
+  return 7 * 'd';
+}
+*/
+ 
 int main() {
-	
-	cout << '\u250C';
+    setlocale(LC_ALL, "");
+    // _printTopLine();
+	cout << (wchar_t)(U'\u2780');
 	for (auto dingus : PIECE_REPRESENTATIONS) {
 		cout << dingus.second;
 	}	
