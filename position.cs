@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-const sbyte[,] STANDARD_POSITION = new int[8,8] {
+class Program {
+
+public static readonly int[,] STANDARD_POSITION = new int[8, 8] {
   {-4,-1,0,0,0,0,1,4},
   {-2,-1,0,0,0,0,1,2},
   {-3,-1,0,0,0,0,1,3},
@@ -13,24 +14,25 @@ const sbyte[,] STANDARD_POSITION = new int[8,8] {
   {-4,-1,0,0,0,0,1,4}
 };
 
-public static Point[] MOVE_DIRECTIONS(sbyte index) {
+public static (int, int)[] MOVE_DIRECTIONS(int index) {
   switch (index) {
-    case -6: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 }, new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 }, new Point { 2, 0 }, new Point { -2,0 } };
-    case -5: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 }, new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 } };
-    case -4: return new Point[] { new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 } };
-    case -3: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 } };
-    case -2: return new Point[] { new Point { 1, 2 }, new Point { -1,2 }, new Point { 1,-2 }, new Point {-1,-2 } };
-    case -1: return new Point[] { new Point { 0, 1 }, new Point { 1, 1 }, new Point { -1,1 }, new Point { 0, 2 } };
-    case  1: return new Point[] { new Point { 0,-1 }, new Point { 1,-1 }, new Point {-1,-1 }, new Point { 0,-2 } };
-    case  2: return new Point[] { new Point { 1, 2 }, new Point { -1,2 }, new Point { 1,-2 }, new Point {-1,-2 } };
-    case  3: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 } };
-    case  4: return new Point[] { new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 } };
-    case  5: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 }, new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 } };
-    case  6: return new Point[] { new Point { 1, 1 }, new Point { -1,1 }, new Point {-1,-1 }, new Point { 1,-1 }, new Point { 0, 1 }, new Point { 0,-1 }, new Point { 1, 0 }, new Point { -1,0 }, new Point { 2, 0 }, new Point { -2,0 } };
+    case -6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
+    case -5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+    case -4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+    case -3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
+    case -2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
+    case -1: return new (int, int)[] { ( 0, 1 ), ( 1, 1 ), ( -1,1 ), ( 0, 2 ) };
+    case  1: return new (int, int)[] { ( 0,-1 ), ( 1,-1 ), (-1,-1 ), ( 0,-2 ) };
+    case  2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
+    case  3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
+    case  4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+    case  5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+    case  6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
   }
+  return null;
 }
 
-const bool[] STANDARD_CASTLING_RIGHTS = new bool[4] {true};
+public static readonly bool[] STANDARD_CASTLING_RIGHTS = new bool[4] { true, true, true, true };
 
 struct Move
 {
@@ -54,30 +56,31 @@ public class Position {
 	public int[,] board;
 	public bool[] castlingRights;
 	
-	public Position(int[,] board = STANDARD_POSITION, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = STANDARD_CASTLING_RIGHTS) {
-		this.board = board;
+	public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null) {
+		this.board = board ?? STANDARD_POSITION;
 		this.toMove = toMove;
 		this.fiftyMoveProximity = fiftyMoveProximity;
-		this.castlingRights = castlingRights;
+		this.castlingRights = castlingRights ?? STANDARD_CASTLING_RIGHTS;
 	}
 
-    public float findBestMove(int depth, float alpha, float beta) {
-        float bestEvaluation = new float(2 * toMove);
+    public float FindBestMove(int depth, float alpha, float beta) {
+        float bestEvaluation = 2 * toMove;
+        float evaluation;
 
         if (toMove == -1)
         {
-            foreach ((position, move) in generatePositions()) {
-                if (!position._kingsInPosition())
+            foreach ((Position position, Move move) in GeneratePositions()) {
+                if (!position._kingsInPosition)
                 {
                     continue;
                 }
                 if (depth > 1)
                 {
-                    float evaluation = position.findBestMove(depth - 1, alpha, beta);
+                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
                 }
                 else
                 {
-                    float evaluation = Random.nextFloat(); /* implement evaluation network here, for now simply random value */ 
+                    evaluation = (float)new Random().NextDouble(); /* implement evaluation network here, for now simply random value */ 
                 }
                 bestEvaluation = Math.Max(bestEvaluation, evaluation);
                 alpha = Math.Max(bestEvaluation, beta);
@@ -90,18 +93,18 @@ public class Position {
 
         else
         {
-            foreach ((position, move) in generatePositions()) {
-                if (!position._kingsInPosition())
+            foreach ((Position position, Move move) in GeneratePositions()) {
+                if (!position._kingsInPosition)
                 {
                     continue;
                 }
                 if (depth > 1)
                 {
-                    float evaluation = position.findBestMove(depth - 1, alpha, beta);
+                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
                 }
                 else
                 {
-                    float evaluation = Random.nextFloat(); /* implement eveluation network here, for now simply random value */
+                    evaluation = (float) new Random().NextDouble(); /* implement eveluation network here, for now simply random value */
                 }
                 bestEvaluation = Math.Min(bestEvaluation, evaluation);
                 beta = Math.Min(bestEvaluation, beta);
@@ -113,31 +116,37 @@ public class Position {
 
         return bestEvaluation;
     }
-
-    public IEnumerable<Position, Move> generatePositions()
+    
+    public string toString()
     {
-        foreach ((squareContent, x, y) in _iteratePosition())
+        return "DORK";
+    }
+
+    private IEnumerable<(Position, Move)> GeneratePositions()
+    {
+        foreach ((int squareContent, int x, int y) in _iteratePosition())
         {
             if (_isPiece(squareContent) && squareContent * toMove > 0)
             {
-                foreach (Point move in MOVE_DIRECTIONS(squareContent))
+                foreach ((int moveX, int moveY) in MOVE_DIRECTIONS(squareContent))
                 {
                     for (int m = 1; m < 9; m++)
                     {
-                        (toX, toY) = (x + move.X * m, y + move.Y * m);
-                        if (!legalMove(x, y, toX, toY))
+                        int toX = x + moveX * m;
+                        int toY = y + moveY * m;
+                        if (!_legalMove(x, y, toX, toY))
                         {
                             break;
                         }
                         else
                         {
-                            yield return (makeMove(x, y, toX, toY), new Move (x, y, toX, toY));
+                            yield return (MakeMove(x, y, toX, toY), new Move (x, y, toX, toY));
                         }
-                        if (_isKing(squareContent) || isKnight(squareContent) || isPawn(squareContent))
+                        if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent))
                         {
                             break;
                         }
-                        if (_isPiece(board[x + toX][y + toY]))
+                        if (_isPiece(board[toX, toY]))
                         {
                             break;
                         }
@@ -147,6 +156,11 @@ public class Position {
         }
     }
 
+    public Position MakeMove(int x, int y, int toX, int toY)
+    {
+        return new Position();
+    }
+
     private bool _legalMove(int x, int y, int toX, int toY) => true;
 
     private bool _kingsInPosition
@@ -154,14 +168,14 @@ public class Position {
         get
         {
             int kingCount = 0;
-            for (int x; x < 8; x++)
+            for (int x = 0; x < 8; x++)
             {
-                for (int y; y < 8; y++)
+                for (int y = 0; y < 8; y++)
                 {
-                    switch (board[x][y])
+                    switch (board[x,y])
                     {
-                        case -6: kingCount++;
-                        case 6: kingCount++;
+                        case -6: kingCount++;break;
+                        case  6: kingCount++;break;
                     }
                 }
             }
@@ -172,35 +186,34 @@ public class Position {
 
     private IEnumerable<(int, int, int)> _iteratePosition()
     {
-        for (int x; x < 8; x++)
+        for (int x = 0; x < 8; x++)
         {
-            for (int y; y < 8; y++)
+            for (int y = 0; y < 8; y++)
             {
-                yield return (this.board[x][y], x, y);
+                yield return (board[x, y], x, y);
             }
         }
     }
 
 }
 
-bool _isPiece(int squareContent) => -7 < squareContent < 0 || 0 < squareContent < 7;
+static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
 
-bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
+static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
 
-bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
+static bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
 
-bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
+static bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
 
-bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
+static bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
 
-namespace Program
-{
-    class Program
+    static void Main()
     {
-        static void Main()
+        Position a = new Position();
+        foreach ((Position position, Move move) in a.GeneratePositions())
         {
-            Console.WriteLine("DORK");
-            Console.ReadKey();
+            Console.WriteLine(position);
         }
+        Console.ReadKey();
     }
 }

@@ -1,5 +1,6 @@
-﻿################################################################################
-# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
-
-/.vs
+﻿/.vs
+/obj/x86/Debug
+/packages/System.ValueTuple.4.4.0
+/Xysticus.csproj.user
+/Xysticus.csproj
+/packages.config
