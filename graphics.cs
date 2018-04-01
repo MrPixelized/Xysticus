@@ -1,6 +1,3 @@
-//from defs import _turnedBoard
-//
-
 Dictionary<sbyte, char> PIECE_REPRESENTATIONS = new Dictionary<sbyte, char>{
 	{0, ' '},
 	{1, 'P'},
