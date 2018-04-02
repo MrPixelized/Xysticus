@@ -1,6 +1,6 @@
-namespace BoardPrinting
+namespace Graphics
 {
-    static class BoardPrinter
+    static class ConsoleGraphics
     {
         private static string PIECE_REPRESENTATIONS(int pieceNumber)
         {

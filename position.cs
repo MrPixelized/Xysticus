@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using BoardPrinting;
+using Graphics;
 
 namespace Chess
 {
@@ -33,8 +33,8 @@ namespace Chess
                 case 4: return new(int, int)[] { (0, 1), (0, -1), (1, 0), (-1, 0) };
                 case 5: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0) };
                 case 6: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0), (2, 0), (-2, 0) };
+                default: return null;
             }
-            return null;
         }
 
         public static readonly bool[] STANDARD_CASTLING_RIGHTS = new bool[4] { true, true, true, true };
@@ -113,7 +113,7 @@ namespace Chess
 
         public override string ToString()
             {
-                return BoardPrinter.DrawPosition(board);
+                return ConsoleGraphics.DrawPosition(board);
             }
 
         public IEnumerable<(Position, Move)> GeneratePositions()
@@ -155,8 +155,8 @@ namespace Chess
                 int moveDifX = fromX - toX;
                 int moveDifY = fromY - toY;
 
-                int[,] newBoard = board;
-                bool[] newCastlingRights = castlingRights;
+                int[,] newBoard = (int[,]) board.Clone();
+                bool[] newCastlingRights = (bool[]) castlingRights.Clone();
                 int newToMove = -1 * toMove;
                 int newFiftyMoveProximity = fiftyMoveProximity;
 
@@ -364,20 +364,4 @@ namespace Chess
 
     }
 
-}
-
-class Program
-{
-    static void Main()
-    {
-        Chess.Position a = new Chess.Position();
-        int b = 0;
-        foreach ((Chess.Position position, Chess.Move move) in a.GeneratePositions())
-        {
-            b++;
-            Console.WriteLine(position);
-            Console.WriteLine(b);
-        }
-        Console.ReadKey();
-    }
 }
