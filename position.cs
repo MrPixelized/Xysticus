@@ -3,216 +3,367 @@ using System.Collections.Generic;
 
 class Program {
 
-public static readonly int[,] STANDARD_POSITION = new int[8, 8] {
-  {-4,-1,0,0,0,0,1,4},
-  {-2,-1,0,0,0,0,1,2},
-  {-3,-1,0,0,0,0,1,3},
-  {-5,-1,0,0,0,0,1,5},
-  {-6,-1,0,0,0,0,1,6},
-  {-3,-1,0,0,0,0,1,3},
-  {-2,-1,0,0,0,0,1,2},
-  {-4,-1,0,0,0,0,1,4}
-};
+    #region Constants
 
-public static (int, int)[] MOVE_DIRECTIONS(int index) {
-  switch (index) {
-    case -6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
-    case -5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
-    case -4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
-    case -3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
-    case -2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
-    case -1: return new (int, int)[] { ( 0, 1 ), ( 1, 1 ), ( -1,1 ), ( 0, 2 ) };
-    case  1: return new (int, int)[] { ( 0,-1 ), ( 1,-1 ), (-1,-1 ), ( 0,-2 ) };
-    case  2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
-    case  3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
-    case  4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
-    case  5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
-    case  6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
-  }
-  return null;
-}
+    public static readonly int[,] STANDARD_POSITION = new int[8, 8] {
+      {-4,-1,0,0,0,0,1,4},
+      {-2,-1,0,0,0,0,1,2},
+      {-3,-1,0,0,0,0,1,3},
+      {-5,-1,0,0,0,0,1,5},
+      {-6,-1,0,0,0,0,1,6},
+      {-3,-1,0,0,0,0,1,3},
+      {-2,-1,0,0,0,0,1,2},
+      {-4,-1,0,0,0,0,1,4}
+    };
 
-public static readonly bool[] STANDARD_CASTLING_RIGHTS = new bool[4] { true, true, true, true };
-
-struct Move
-{
-    int fromX;
-    int fromY;
-    int toX;
-    int toY;
-
-    public Move(int x1, int y1, int x2, int y2)
-    {
-        fromX = x1;
-        fromY = y1;
-        toX = x2;
-        toY = y2;
+    public static (int, int)[] MOVE_DIRECTIONS(int index) {
+      switch (index) {
+        case -6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
+        case -5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+        case -4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+        case -3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
+        case -2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
+        case -1: return new (int, int)[] { ( 0, 1 ), ( 1, 1 ), ( -1,1 ), ( 0, 2 ) };
+        case  1: return new (int, int)[] { ( 0,-1 ), ( 1,-1 ), (-1,-1 ), ( 0,-2 ) };
+        case  2: return new (int, int)[] { ( 1, 2 ), ( -1,2 ), ( 1,-2 ), (-1,-2 ) };
+        case  3: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ) };
+        case  4: return new (int, int)[] { ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+        case  5: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ) };
+        case  6: return new (int, int)[] { ( 1, 1 ), ( -1,1 ), (-1,-1 ), ( 1,-1 ), ( 0, 1 ), ( 0,-1 ), ( 1, 0 ), ( -1,0 ), ( 2, 0 ), ( -2,0 ) };
+      }
+      return null;
     }
-}
 
-public class Position {
-	public int toMove;
-	public int fiftyMoveProximity;
-	public int[,] board;
-	public bool[] castlingRights;
-	
-	public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null) {
-		this.board = board ?? STANDARD_POSITION;
-		this.toMove = toMove;
-		this.fiftyMoveProximity = fiftyMoveProximity;
-		this.castlingRights = castlingRights ?? STANDARD_CASTLING_RIGHTS;
-	}
+    public static readonly bool[] STANDARD_CASTLING_RIGHTS = new bool[4] { true, true, true, true };
 
-    public float FindBestMove(int depth, float alpha, float beta) {
-        float bestEvaluation = 2 * toMove;
-        float evaluation;
+    #endregion
 
-        if (toMove == -1)
+    public struct Move
+    {
+        public int fromX;
+        public int fromY;
+        public int toX;
+        public int toY;
+
+        public Move(int x1, int y1, int x2, int y2)
         {
-            foreach ((Position position, Move move) in GeneratePositions()) {
-                if (!position._kingsInPosition)
-                {
-                    continue;
-                }
-                if (depth > 1)
-                {
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-                }
-                else
-                {
-                    evaluation = (float)new Random().NextDouble(); /* implement evaluation network here, for now simply random value */ 
-                }
-                bestEvaluation = Math.Max(bestEvaluation, evaluation);
-                alpha = Math.Max(bestEvaluation, beta);
-                if (beta <= alpha)
-                {
-                    break;
-                }
-            }
+            fromX = x1;
+            fromY = y1;
+            toX = x2;
+            toY = y2;
         }
-
-        else
-        {
-            foreach ((Position position, Move move) in GeneratePositions()) {
-                if (!position._kingsInPosition)
-                {
-                    continue;
-                }
-                if (depth > 1)
-                {
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-                }
-                else
-                {
-                    evaluation = (float) new Random().NextDouble(); /* implement eveluation network here, for now simply random value */
-                }
-                bestEvaluation = Math.Min(bestEvaluation, evaluation);
-                beta = Math.Min(bestEvaluation, beta);
-                if (beta <= alpha) {
-                    break;
-                }
-            }
-        }
-
-        return bestEvaluation;
     }
     
-    public string toString()
-    {
-        return "DORK";
-    }
+    public class Position {
+	    public int toMove;
+	    public int fiftyMoveProximity;
+	    public int[,] board;
+	    public bool[] castlingRights;
+	
+	    public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null) {
+		    this.board = board ?? STANDARD_POSITION;
+		    this.toMove = toMove;
+		    this.fiftyMoveProximity = fiftyMoveProximity;
+		    this.castlingRights = castlingRights ?? STANDARD_CASTLING_RIGHTS;
+	    }
 
-    private IEnumerable<(Position, Move)> GeneratePositions()
-    {
-        foreach ((int squareContent, int x, int y) in _iteratePosition())
-        {
-            if (_isPiece(squareContent) && squareContent * toMove > 0)
+        public float FindBestMove(int depth, float alpha, float beta) {
+            float bestEvaluation = 2 * toMove;
+            float evaluation;
+
+            if (toMove == -1)
             {
-                foreach ((int moveX, int moveY) in MOVE_DIRECTIONS(squareContent))
+                foreach ((Position position, Move move) in GeneratePositions()) {
+                    if (!position._kingsInPosition) continue;
+
+                    if (depth > 1) evaluation = position.FindBestMove(depth - 1, alpha, beta);
+                    // implement evaluation network here, for now simply random value
+                    else evaluation = (float)new Random().NextDouble();
+
+                    bestEvaluation = Math.Max(bestEvaluation, evaluation);
+                    alpha = Math.Max(bestEvaluation, beta);
+                    if (beta <= alpha) break;
+                }
+            }
+
+            else
+            {
+                foreach ((Position position, Move move) in GeneratePositions()) {
+                    if (!position._kingsInPosition) continue;
+
+                    if (depth > 1) evaluation = position.FindBestMove(depth - 1, alpha, beta);
+                    // implement eveluation network here, for now simply random value
+                    else evaluation = (float) new Random().NextDouble();
+
+                    bestEvaluation = Math.Min(bestEvaluation, evaluation);
+                    beta = Math.Min(bestEvaluation, beta);
+                    if (beta <= alpha) break;
+                }
+            }
+
+            return bestEvaluation;
+        }
+    
+        public override string ToString()
+        {
+            return "DORK";
+        }
+
+        public IEnumerable<(Position, Move)> GeneratePositions()
+        {
+            foreach ((int squareContent, int x, int y) in _iteratePosition())
+            {
+                if (_isPiece(squareContent) && squareContent * toMove > 0)
                 {
-                    for (int m = 1; m < 9; m++)
+                    foreach ((int moveX, int moveY) in MOVE_DIRECTIONS(squareContent))
                     {
-                        int toX = x + moveX * m;
-                        int toY = y + moveY * m;
-                        if (!_legalMove(x, y, toX, toY))
+                        for (int m = 1; m < 9; m++)
                         {
-                            break;
-                        }
-                        else
-                        {
-                            yield return (MakeMove(x, y, toX, toY), new Move (x, y, toX, toY));
-                        }
-                        if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent))
-                        {
-                            break;
-                        }
-                        if (_isPiece(board[toX, toY]))
-                        {
-                            break;
+                            int toX = x + moveX * m;
+                            int toY = y + moveY * m;
+                            Move currentMove = new Move(x, y, toX, toY);
+
+                            if (!_legalMove(currentMove)) break;
+                            else yield return (MakeMove(currentMove), currentMove);
+
+                            if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent)) break;
+                            if (_isPiece(board[toX, toY])) break;
                         }
                     }
                 }
             }
         }
-    }
 
-    public Position MakeMove(int x, int y, int toX, int toY)
-    {
-        return new Position();
-    }
-
-    private bool _legalMove(int x, int y, int toX, int toY) => true;
-
-    private bool _kingsInPosition
-    {
-        get
+        public Position MakeMove(Move move)
         {
-            int kingCount = 0;
+            int toX = move.toX;
+            int toY = move.toY;
+            int fromX = move.fromX;
+            int fromY = move.fromY;
+
+            int pieceToMove = board[fromX, fromY];
+            int squareToMoveTo = board[toX, toY];
+
+            int moveDifX = fromX - toX;
+            int moveDifY = fromY - toY;
+
+            int[,] newBoard = board;
+            bool[] newCastlingRights = castlingRights;
+            int newToMove = -1 * toMove;
+            int newFiftyMoveProximity = fiftyMoveProximity;
+
+            if (_isPiece(squareToMoveTo)) newFiftyMoveProximity = 0;
+
+            if (_isKing(pieceToMove))
+            {
+                if (pieceToMove < 0)
+                {
+                    (newCastlingRights[1], newCastlingRights[3]) = (false, false);
+                    if (moveDifX == -2)
+                    {
+                        newBoard[fromX + 1, 0] = -4;
+                        newBoard[0, 7] = 0;
+                    }
+                    else if (moveDifX == 2)
+                    {
+                        newBoard[fromX - 1, 0] = -4;
+                        newBoard[0, 0] = 0;
+                    }
+                }
+                else
+                {
+                    (newCastlingRights[0], newCastlingRights[2]) = (false, false);
+                    if (moveDifX == -2)
+                    {
+                        newBoard[fromX + 1, 7] = 4;
+                        newBoard[7, 7] = 0;
+                    }
+                    else if (moveDifX == 2)
+                    {
+                        newBoard[fromX - 1, 7] = 4;
+                        newBoard[0, 7] = 4;
+                    }
+                }
+            }
+
+            if (_isRook(pieceToMove))
+            {
+                if (fromX == 0 || fromY == 0) newCastlingRights[3] = false;
+                else if (fromX == 0 || fromY == 7) newCastlingRights[2] = false;
+                else if (fromX == 7 || fromY == 0) newCastlingRights[1] = false;
+                else if (fromX == 7 || fromY == 7) newCastlingRights[0] = false;
+            }
+
+            if (_isEnPassant(squareToMoveTo) || _isPawn(pieceToMove))
+            {
+                if (pieceToMove < 0) newBoard[toX, toY - 1] = 0;
+                else newBoard[toX, toY + 1] = 0;
+            }
+
+            _removeEnPassant(ref newBoard);
+
+            if (_isPawn(pieceToMove))
+            {
+                newFiftyMoveProximity = 0;
+                if (moveDifY == -2) newBoard[fromX, fromY + 1] = -7;
+                else if (moveDifY == 2) newBoard[fromX, fromY - 1] = 7;
+            }
+
+            (newBoard[fromX, fromY], newBoard[toX, toY]) = (0, pieceToMove);
+
+            return new Position(newBoard, newToMove, newFiftyMoveProximity, newCastlingRights);
+        }
+
+        private bool _legalMove(Move move)
+        {
+            int toX = move.toX;
+            int toY = move.toY;
+
+            if (toX > 7 || toX < 0 || toY > 7 || toY < 0)
+            {
+                return false;
+            }
+
+            int fromY = move.fromY;
+            int fromX = move.fromX;
+
+            int pieceToMove = board[fromX, fromY];
+            int squareToMoveTo = board[toX, toY];
+            int colorIndication = pieceToMove * squareToMoveTo;
+
+            int moveDifX = fromX - toX;
+            int moveDifY = fromY - toY;
+
+            if (_isPawn(pieceToMove))
+            {
+                if (moveDifY == 2 && !(fromY == 6))
+                {
+                    return false;
+                }
+                else if (moveDifY == -2 && !(fromY == 1))
+                {
+                    return false;
+                }
+                else if ((moveDifX == 1 || moveDifX == -1) && colorIndication >= 0)
+                {
+                    return false;
+                }
+            }
+
+            else if (_isKing(pieceToMove))
+            {
+                if (pieceToMove < 0)
+                {
+                    if (moveDifX == 2)
+                    {
+                        if (!(board[5, 0] == 0 || board[6, 0] == 0 || castlingRights[1]))
+                        {
+                            return false;
+                        }
+                    }
+                    if (moveDifX == -2)
+                    {
+                        if (!(board[1, 0] == 0 || board[2, 0] == 0 || board[3,0] == 0 || castlingRights[3]))
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    if (moveDifX == 2)
+                    {
+                        if (!(board[5, 7] == 0 || board[6, 7] == 0 || castlingRights[0]))
+                        {
+                            return false;
+                        }
+                    }
+                    if (moveDifX == -2)
+                    {
+                        if (!(board[1, 7] == 0 || board[2, 7] == 0 || board[3, 7] == 0 || castlingRights[2]))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            return colorIndication <= 0;
+        }
+
+        private bool _kingsInPosition
+        {
+            get
+            {
+                int kingCount = 0;
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        switch (board[x,y])
+                        {
+                            case -6: kingCount++;break;
+                            case  6: kingCount++;break;
+                        }
+                    }
+                }
+
+                return (kingCount == 2);
+            }
+        }
+
+        private IEnumerable<(int, int, int)> _iteratePosition()
+        {
             for (int x = 0; x < 8; x++)
             {
                 for (int y = 0; y < 8; y++)
                 {
-                    switch (board[x,y])
-                    {
-                        case -6: kingCount++;break;
-                        case  6: kingCount++;break;
-                    }
+                    yield return (board[x, y], x, y);
                 }
             }
-
-            return (kingCount == 2);
         }
+
     }
 
-    private IEnumerable<(int, int, int)> _iteratePosition()
+    #region Short aliases
+
+    static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
+
+    static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
+
+    static bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
+
+    static bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
+
+    static bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
+
+    static bool _isEnPassant(int squareContent) => squareContent == 7 || squareContent == -7;
+
+    static void _removeEnPassant(ref int[,] board)
     {
-        for (int x = 0; x < 8; x++)
+        for (int x=0; x<8; x++)
         {
-            for (int y = 0; y < 8; y++)
+            for (int y = 0; y<8; y++)
             {
-                yield return (board[x, y], x, y);
+                if (_isEnPassant(board[x, y]))
+                {
+                    board[x, y] = 0;
+                    return;
+                }
             }
         }
     }
 
-}
-
-static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
-
-static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
-
-static bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
-
-static bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
-
-static bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
+    #endregion
 
     static void Main()
     {
         Position a = new Position();
+        int b = 0;
         foreach ((Position position, Move move) in a.GeneratePositions())
         {
-            Console.WriteLine(position);
+            b++;
+            Console.WriteLine(b.ToString());
         }
         Console.ReadKey();
     }

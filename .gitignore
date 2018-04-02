@@ -4,3 +4,6 @@
 /Xysticus.csproj.user
 /Xysticus.csproj
 /packages.config
+/bin
+/obj/x86/Release
+/Xysticus.sln
