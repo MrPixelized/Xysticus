@@ -2,7 +2,7 @@ namespace BoardPrinting
 {
     class BoardPrinter
     {
-        private string PIECE_REPRESENTATIONS(sbyte pieceNumber)
+        private string PIECE_REPRESENTATIONS(int pieceNumber)
         {
             switch (pieceNumber)
             {
@@ -62,7 +62,7 @@ namespace BoardPrinting
             middleLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("right split edge") + "\n";
             return middleLine;
         }
-        private string ConstructMiddlePart(sbyte[,] board)
+        private string ConstructMiddlePart(int[,] board)
         {
             string middlePart = "";
             for (sbyte i = 0; i < 8; i++)
@@ -88,7 +88,7 @@ namespace BoardPrinting
             bottomLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("bottom right corner");
             return bottomLine;
         }
-        public string DrawPosition(sbyte[,] board)
+        public string DrawPosition(int[,] board)
         {
             return ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine();
         }
