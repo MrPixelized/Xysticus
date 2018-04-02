@@ -1,8 +1,8 @@
 namespace BoardPrinting
 {
-    class BoardPrinter
+    static class BoardPrinter
     {
-        private string PIECE_REPRESENTATIONS(int pieceNumber)
+        private static string PIECE_REPRESENTATIONS(int pieceNumber)
         {
             switch (pieceNumber)
             {
@@ -24,7 +24,7 @@ namespace BoardPrinting
                 default: return " ";
             }
         }
-        private string BORDER_GRAPHICS(string graphicsSpecification)
+        private static string BORDER_GRAPHICS(string graphicsSpecification)
         {
             switch (graphicsSpecification)
             {
@@ -42,7 +42,7 @@ namespace BoardPrinting
                 default: return " ";
             }
         }
-        private string ConstructTopLine()
+        private static string ConstructTopLine()
         {
             string topLine = BORDER_GRAPHICS("top left corner");
             for (sbyte i = 0; i < 7; i++)
@@ -52,7 +52,7 @@ namespace BoardPrinting
             topLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("top right corner") + "\n";
             return topLine;
         }
-        private string ConstructMiddleLine()
+        private static string ConstructMiddleLine()
         {
             string middleLine = BORDER_GRAPHICS("left split edge");
             for (sbyte i = 0; i < 7; i++)
@@ -62,7 +62,7 @@ namespace BoardPrinting
             middleLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("right split edge") + "\n";
             return middleLine;
         }
-        private string ConstructMiddlePart(int[,] board)
+        private static string ConstructMiddlePart(int[,] board)
         {
             string middlePart = "";
             for (sbyte i = 0; i < 8; i++)
@@ -78,7 +78,7 @@ namespace BoardPrinting
             }
             return middlePart;
         }
-        private string ConstructBottomLine()
+        private static string ConstructBottomLine()
         {
             string bottomLine = BORDER_GRAPHICS("bottom left corner");
             for (sbyte i = 0; i < 7; i++)
@@ -88,7 +88,7 @@ namespace BoardPrinting
             bottomLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("bottom right corner");
             return bottomLine;
         }
-        public string DrawPosition(int[,] board)
+        public static string DrawPosition(int[,] board)
         {
             return ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine();
         }
