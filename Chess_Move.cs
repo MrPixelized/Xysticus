@@ -1,4 +1,7 @@
-﻿namespace Chess
+﻿/* MOVE:
+ * Move is simply a more convenient placeholder for a ValueTuple`4 */
+
+namespace Chess
 {
     public struct Move
     {

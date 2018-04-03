@@ -1,4 +1,26 @@
-﻿namespace Chess
+﻿/* SQUARE-PIECE VALUES:
+ *  0: empty
+ *  1: pawn
+ *  2: knight
+ *  3: bishop
+ *  4: rook
+ *  5: queen
+ *  6: king
+ *  7: en-passant square
+ *  negative values represent black pieces, positive values represent white pieces. */
+
+/* COLOR-REPRESENTATIONS:
+ * -1: black
+ *  1: white */
+
+/* CASTLING RIGHTS:
+ * Castling rights are represented as a tuple of four binary values, ordered as follows:
+ *     (white's short castling rights,
+ *      black's short castling rights,
+ *      white's long castling rights,
+ *      black's long castling rights) */
+
+namespace Chess
 {
     static class Constants
     {
