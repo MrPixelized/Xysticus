@@ -1,7 +1,6 @@
 ﻿using System;
 using Chess;
-using Interface.UserInterface;
-using Interface.CPUInterface;
+using Interface;
 
 public class Engine
 {
@@ -9,7 +8,7 @@ public class Engine
     {
         Position a = new Position();
 
-        Console.WriteLine(ConsoleGraphics.DrawPosition(a.board));
+        InputLoop.AwaitInput();
         Console.WriteLine(a.FindBestMove(1, -2, 2));
         Console.ReadKey();
     }
