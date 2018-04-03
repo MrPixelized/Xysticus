@@ -10,6 +10,7 @@ namespace Chess
         public int fiftyMoveProximity;
         public int[,] board;
         public bool[] castlingRights;
+        private Position[] reachablePositions;
 
         public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null)
         {
@@ -21,7 +22,6 @@ namespace Chess
 
         public float FindBestMove(int depth, float alpha, float beta)
         {
-            // Initialising bestEvaluation and evaluation
             float bestEvaluation = 2 * toMove;
             float evaluation;
 
@@ -197,9 +197,9 @@ namespace Chess
         {
             int toX = move.toX;
             int toY = move.toY;
-            
+
             // Testing to see if the move puts a piece out of bounds
-            if (toX > 7 || toX < 0 || toY > 7 || toY < 0) return false;
+            if (_outOfBounds(toX, toY)) return false;
 
             int fromY = move.fromY;
             int fromX = move.fromX;
@@ -210,6 +210,9 @@ namespace Chess
 
             int moveDifX = fromX - toX;
             int moveDifY = fromY - toY;
+
+            // Make sure the piece moved doesn't land on a friendly piece
+            if (colorIndication > 0) return false;
 
             // Test to see if any double pawn moves or pawn pushes are legal
             if (_isPawn(pieceToMove))
@@ -231,44 +234,11 @@ namespace Chess
             // If a king might want to castle, test if this is in accordance with the current castling rights
             else if (_isKing(pieceToMove))
             {
-                if (pieceToMove < 0)
-                {
-                    if (moveDifX == 2)
-                    {
-                        if (!(board[5, 0] == 0 || board[6, 0] == 0 || castlingRights[1]))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (moveDifX == -2)
-                    {
-                        if (!(board[1, 0] == 0 || board[2, 0] == 0 || board[3, 0] == 0 || castlingRights[3]))
-                        {
-                            return false;
-                        }
-                    }
-                }
-                else
-                {
-                    if (moveDifX == 2)
-                    {
-                        if (!(board[5, 7] == 0 || board[6, 7] == 0 || castlingRights[0]))
-                        {
-                            return false;
-                        }
-                    }
-                    else if (moveDifX == -2)
-                    {
-                        if (!(board[1, 7] == 0 || board[2, 7] == 0 || board[3, 7] == 0 || castlingRights[2]))
-                        {
-                            return false;
-                        }
-                    }
-                }
+                if (_castlingLegal(moveDifX, pieceToMove)) return true;
+                return false;
             }
 
-            // Make sure the piece moved doesn't land on a friendly piece
-            return colorIndication <= 0;
+            return true;
         }
 
         private bool _kingsInPosition
@@ -330,6 +300,58 @@ namespace Chess
                     }
                 }
             }
+        }
+
+        static bool _outOfBounds(int x, int y)
+        {
+            return (x > 7 || x < 0 || y > 7 || y < 0);
+        }
+
+        bool _castlingLegal(int moveDifX, int king)
+        {
+            // Black to castle
+            if (king < 0)
+            {
+                // Short castling
+                if (moveDifX == 2)
+                {
+                    if (board[5, 0] == 0 && board[6, 0] == 0 && castlingRights[1])
+                    {
+                        return true;
+                    }
+                }
+                // Long castling
+                else if (moveDifX == -2)
+                {
+                    if (board[1, 0] == 0 && board[2, 0] == 0 && board[3, 0] == 0 && castlingRights[3])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            // White to castle
+            else
+            {
+                // Short castling
+                if (moveDifX == 2)
+                {
+                    if (board[5, 7] == 0 && board[6, 7] == 0 && castlingRights[0])
+                    {
+                        return true;
+                    }
+                }
+                // Long castling
+                else if (moveDifX == -2)
+                {
+                    if (board[1, 7] == 0 && board[2, 7] == 0 && board[3, 7] == 0 && castlingRights[2])
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         #endregion
