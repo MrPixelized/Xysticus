@@ -6,7 +6,6 @@
  *  4: rook
  *  5: queen
  *  6: king
- *  7: en-passant square
  *  negative values represent black pieces, positive values represent white pieces. */
 
 /* COLOR-REPRESENTATIONS:
@@ -45,12 +44,12 @@ namespace Chess
                 case -3: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1) };
                 case -2: return new(int, int)[] { (1, 2), (-1, 2), (1, -2), (-1, -2) };
                 case -1: return new(int, int)[] { (0, 1), (1, 1), (-1, 1), (0, 2) };
-                case 1: return new(int, int)[] { (0, -1), (1, -1), (-1, -1), (0, -2) };
-                case 2: return new(int, int)[] { (1, 2), (-1, 2), (1, -2), (-1, -2) };
-                case 3: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1) };
-                case 4: return new(int, int)[] { (0, 1), (0, -1), (1, 0), (-1, 0) };
-                case 5: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0) };
-                case 6: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0), (2, 0), (-2, 0) };
+                case  1: return new(int, int)[] { (0, -1), (1, -1), (-1, -1), (0, -2) };
+                case  2: return new(int, int)[] { (1, 2), (-1, 2), (1, -2), (-1, -2) };
+                case  3: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1) };
+                case  4: return new(int, int)[] { (0, 1), (0, -1), (1, 0), (-1, 0) };
+                case  5: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0) };
+                case  6: return new(int, int)[] { (1, 1), (-1, 1), (-1, -1), (1, -1), (0, 1), (0, -1), (1, 0), (-1, 0), (2, 0), (-2, 0) };
                 default: return null;
             }
         }

@@ -51,12 +51,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Chess_Constants.cs" />
+    <Compile Include="Interface_ConsoleGraphics.cs" />
     <Compile Include="Interface_Constants.cs" />
-    <Compile Include="Interface_CPUInterface.cs" />
     <Compile Include="Chess_Move.cs" />
-    <Compile Include="Interface_UserInterface.cs" />
     <Compile Include="Engine_Main.cs" />
     <Compile Include="Chess_Position.cs" />
+    <Compile Include="Interface_FENParser.cs" />
+    <Compile Include="Interface_InputLoop.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />

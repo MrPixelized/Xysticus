@@ -8,8 +8,17 @@ public class Engine
     {
         Position a = new Position();
 
-        InputLoop.AwaitInput();
-        Console.WriteLine(a.FindBestMove(1, -2, 2));
+        System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
+
+        for (int c=1; c<12; c++)
+        {
+            watch.Start();
+            Console.WriteLine(string.Format("Evaluation: {0}", a.FindBestMove(c, -2, 2)));
+            watch.Stop();
+
+            Console.WriteLine(string.Format("Depth: {0} | Elapsed milliseconds: {1}", c, watch.ElapsedMilliseconds));
+            watch.Reset();
+        }
         Console.ReadKey();
     }
 }

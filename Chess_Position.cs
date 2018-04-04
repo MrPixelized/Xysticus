@@ -1,23 +1,24 @@
 using System;
 using System.Collections.Generic;
+using Interface;
 
 namespace Chess
 {
-
     public class Position
     {
         public int toMove;
         public int fiftyMoveProximity;
         public int[,] board;
         public bool[] castlingRights;
-        private Position[] reachablePositions;
+        private Tuple<int, int> enPassantSquare;
 
-        public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null)
+        public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null, Tuple<int, int> enPassantSquare = null)
         {
             this.board = board ?? Constants.STANDARD_POSITION;
             this.toMove = toMove;
             this.fiftyMoveProximity = fiftyMoveProximity;
             this.castlingRights = castlingRights ?? Constants.STANDARD_CASTLING_RIGHTS;
+            this.enPassantSquare = enPassantSquare ?? new Tuple<int, int>(-1, -1);
         }
 
         public float FindBestMove(int depth, float alpha, float beta)
@@ -31,7 +32,11 @@ namespace Chess
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (!position._kingsInPosition) evaluation = -3;
+                    if (position == null)
+                    {
+                        //Console.WriteLine(ConsoleGraphics.DrawPosition(position.board));
+                        return -3;
+                    }
 
                     // If the requested depth has not yet been reached, generate another layer of positions
                     // Otherwise, evaluate this current position (which is a leaf node)
@@ -52,7 +57,11 @@ namespace Chess
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (!position._kingsInPosition) evaluation = -3;
+                    if (position == null)
+                    {
+                        //Console.WriteLine(ConsoleGraphics.DrawPosition(position.board));
+                        return 3;
+                    }
 
                     // If the requested depth has not yet been reached, generate another layer of positions
                     // Otherwise, evaluate this current position (which is a leaf node)
@@ -88,7 +97,10 @@ namespace Chess
                             Move currentMove = new Move(x, y, toX, toY);
                             
                             // Test if the current move being computed is possible, disregarding checks.
-                            if (!_legalMove(currentMove)) break;
+                            if (!IsLegalMove(currentMove)) break;
+
+                            // If the square this piece is about to land on is a king, recognise that this move is illegal by returning null
+                            if (_isKing(board[toX, toY])) yield return (null, currentMove);
 
                             yield return (MakeMove(currentMove), currentMove);
                             
@@ -118,6 +130,7 @@ namespace Chess
             bool[] newCastlingRights = (bool[]) castlingRights.Clone();
             int newToMove = -1 * toMove;
             int newFiftyMoveProximity = fiftyMoveProximity;
+            Tuple<int, int> newEnPassantSquare = null;
             
             // If this move is a capturing move, reset the fifty move proximity.
             if (_isPiece(squareToMoveTo)) newFiftyMoveProximity = 0;
@@ -168,21 +181,15 @@ namespace Chess
             // Also, en passant capturing is handled
             if (_isPawn(pieceToMove))
             {
-                if (_isEnPassant(squareToMoveTo))
+                if (enPassantSquare.Item1 == toX && enPassantSquare.Item2 == toY)
                 {
                     if (pieceToMove < 0) newBoard[toX, toY - 1] = 0;
                     else newBoard[toX, toY + 1] = 0;
+                    Console.WriteLine(ConsoleGraphics.DrawPosition(board));
                 }
-            }
 
-            // Removing the en passant square
-            _removeEnPassant(ref newBoard);
-
-            // Exceptions for double pawn moves are made
-            if (_isPawn(pieceToMove))
-            { 
-                if (moveDifY == -2) newBoard[fromX, fromY + 1] = -7;
-                else if (moveDifY == 2) newBoard[fromX, fromY - 1] = 7;
+                else if (moveDifY == -2) newEnPassantSquare = new Tuple<int, int> (fromX, fromY + 1);
+                else if (moveDifY == 2) newEnPassantSquare = new Tuple<int, int> (fromX, fromY - 1);
 
                 newFiftyMoveProximity = 0;
             }
@@ -190,16 +197,16 @@ namespace Chess
             // Finally, the piece is moved to the desired spot
             (newBoard[fromX, fromY], newBoard[toX, toY]) = (0, pieceToMove);
 
-            return new Position(newBoard, newToMove, newFiftyMoveProximity, newCastlingRights);
+            return new Position(newBoard, newToMove, newFiftyMoveProximity, newCastlingRights, newEnPassantSquare);
         }
 
-        private bool _legalMove(Move move)
+        private bool IsLegalMove(Move move)
         {
             int toX = move.toX;
             int toY = move.toY;
 
             // Testing to see if the move puts a piece out of bounds
-            if (_outOfBounds(toX, toY)) return false;
+            if (_isOutOfBounds(toX, toY)) return false;
 
             int fromY = move.fromY;
             int fromX = move.fromX;
@@ -225,7 +232,11 @@ namespace Chess
                 {
                     return false;
                 }
-                else if ((moveDifX == 1 || moveDifX == -1) && colorIndication >= 0)
+                else if (enPassantSquare.Item1 == toX && enPassantSquare.Item2 == toY)
+                {
+                    return true;
+                }
+                else if ((moveDifX == 1 || moveDifX == -1) && colorIndication == 0)
                 {
                     return false;
                 }
@@ -234,33 +245,13 @@ namespace Chess
             // If a king might want to castle, test if this is in accordance with the current castling rights
             else if (_isKing(pieceToMove))
             {
-                if (_castlingLegal(moveDifX, pieceToMove)) return true;
-                return false;
+                return _isLegalCastling(moveDifX, pieceToMove);
             }
 
             return true;
         }
 
-        private bool _kingsInPosition
-        {
-            get
-            {
-                int kingCount = 0;
-                for (int x = 0; x < 8; x++)
-                {
-                    for (int y = 0; y < 8; y++)
-                    {
-                        switch (board[x, y])
-                        {
-                            case -6: kingCount++; break;
-                            case 6: kingCount++; break;
-                        }
-                    }
-                }
-
-                return (kingCount == 2);
-            }
-        }
+        #region Short aliases
 
         private IEnumerable<(int, int, int)> _iteratePosition()
         {
@@ -273,41 +264,19 @@ namespace Chess
             }
         }
 
-        #region Short aliases
+        private static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
 
-        static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
+        private static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
 
-        static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
+        private static bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
 
-        static bool _isKnight(int squareContent) => squareContent == 2 || squareContent == -2;
+        private static bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
 
-        static bool _isRook(int squareContent) => squareContent == 4 || squareContent == -4;
+        private static bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
 
-        static bool _isKing(int squareContent) => squareContent == 6 || squareContent == -6;
+        private static bool _isOutOfBounds(int x, int y) => (x > 7 || x < 0 || y > 7 || y < 0);
 
-        static bool _isEnPassant(int squareContent) => squareContent == 7 || squareContent == -7;
-
-        static void _removeEnPassant(ref int[,] board)
-        {
-            for (int x = 0; x < 8; x++)
-            {
-                for (int y = 0; y < 8; y++)
-                {
-                    if (_isEnPassant(board[x, y]))
-                    {
-                        board[x, y] = 0;
-                        return;
-                    }
-                }
-            }
-        }
-
-        static bool _outOfBounds(int x, int y)
-        {
-            return (x > 7 || x < 0 || y > 7 || y < 0);
-        }
-
-        bool _castlingLegal(int moveDifX, int king)
+        private bool _isLegalCastling(int moveDifX, int king)
         {
             // Black to castle
             if (king < 0)
