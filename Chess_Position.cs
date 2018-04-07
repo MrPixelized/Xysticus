@@ -10,7 +10,7 @@ namespace Chess
         public int fiftyMoveProximity;
         public int[,] board;
         public bool[] castlingRights;
-        private Tuple<int, int> enPassantSquare;
+        public Tuple<int, int> enPassantSquare;
 
         public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null, Tuple<int, int> enPassantSquare = null)
         {
@@ -23,26 +23,28 @@ namespace Chess
 
         public float FindBestMove(int depth, float alpha, float beta)
         {
-            float bestEvaluation = 2 * toMove;
+            float bestEvaluation;
             float evaluation;
 
-            // Maximizing player
-            if (toMove == -1)
+            if (depth <= 1)
             {
+                return (float)new Random().NextDouble();
+            }
+
+            // Maximizing player
+            if (toMove == 1)
+            {
+                bestEvaluation = -100;
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
                     if (position == null)
                     {
-                        //Console.WriteLine(ConsoleGraphics.DrawPosition(position.board));
                         return -3;
                     }
 
                     // If the requested depth has not yet been reached, generate another layer of positions
-                    // Otherwise, evaluate this current position (which is a leaf node)
-                    if (depth > 1) evaluation = position.FindBestMove(depth - 1, alpha, beta);
-                    // FUTURE: Implement evaluation network here, for now simply random value
-                    else evaluation = (float) new Random().NextDouble();
+                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
 
                     // MINIMAX
                     bestEvaluation = Math.Max(bestEvaluation, evaluation);
@@ -54,20 +56,17 @@ namespace Chess
             // Minimizing player
             else
             {
+                bestEvaluation = 100;
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
                     if (position == null)
                     {
-                        //Console.WriteLine(ConsoleGraphics.DrawPosition(position.board));
-                        return 3;
+                         return 3;
                     }
 
                     // If the requested depth has not yet been reached, generate another layer of positions
-                    // Otherwise, evaluate this current position (which is a leaf node)
-                    if (depth > 1) evaluation = position.FindBestMove(depth - 1, alpha, beta);
-                    // FUTURE: Implement eveluation network here, for now simply random value
-                    else evaluation = (float)new Random().NextDouble();
+                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
 
                     // MINIMAX
                     bestEvaluation = Math.Min(bestEvaluation, evaluation);
@@ -123,14 +122,14 @@ namespace Chess
             int pieceToMove = board[fromX, fromY];
             int squareToMoveTo = board[toX, toY];
 
-            int moveDifX = fromX - toX;
-            int moveDifY = fromY - toY;
+            int moveDifX = toX - fromX;
+            int moveDifY = toY - fromY;
 
             int[,] newBoard = (int[,]) board.Clone();
             bool[] newCastlingRights = (bool[]) castlingRights.Clone();
             int newToMove = -1 * toMove;
-            int newFiftyMoveProximity = fiftyMoveProximity;
-            Tuple<int, int> newEnPassantSquare = null;
+            int newFiftyMoveProximity = fiftyMoveProximity + 1;
+            Tuple<int, int> newEnPassantSquare = new Tuple<int, int>(-1, -1);
             
             // If this move is a capturing move, reset the fifty move proximity.
             if (_isPiece(squareToMoveTo)) newFiftyMoveProximity = 0;
@@ -141,12 +140,12 @@ namespace Chess
                 if (pieceToMove < 0)
                 {
                     (newCastlingRights[1], newCastlingRights[3]) = (false, false);
-                    if (moveDifX == -2)
+                    if (moveDifX == 2)
                     {
                         newBoard[fromX + 1, 0] = -4;
                         newBoard[0, 7] = 0;
                     }
-                    else if (moveDifX == 2)
+                    else if (moveDifX == -2)
                     {
                         newBoard[fromX - 1, 0] = -4;
                         newBoard[0, 0] = 0;
@@ -155,12 +154,12 @@ namespace Chess
                 else
                 {
                     (newCastlingRights[0], newCastlingRights[2]) = (false, false);
-                    if (moveDifX == -2)
+                    if (moveDifX == 2)
                     {
                         newBoard[fromX + 1, 7] = 4;
                         newBoard[7, 7] = 0;
                     }
-                    else if (moveDifX == 2)
+                    else if (moveDifX == -2)
                     {
                         newBoard[fromX - 1, 7] = 4;
                         newBoard[0, 7] = 4;
@@ -185,17 +184,25 @@ namespace Chess
                 {
                     if (pieceToMove < 0) newBoard[toX, toY - 1] = 0;
                     else newBoard[toX, toY + 1] = 0;
-                    Console.WriteLine(ConsoleGraphics.DrawPosition(board));
+                    newBoard[fromX, fromY] = 0;
+                    newBoard[toX, toY] = pieceToMove;
                 }
 
-                else if (moveDifY == -2) newEnPassantSquare = new Tuple<int, int> (fromX, fromY + 1);
-                else if (moveDifY == 2) newEnPassantSquare = new Tuple<int, int> (fromX, fromY - 1);
+                if (moveDifY == 2)
+                {
+                    newEnPassantSquare = new Tuple<int, int>(fromX, 2);
+                }
+                else if (moveDifY == -2)
+                {
+                    newEnPassantSquare = new Tuple<int, int>(fromX, 5);
+                }
 
                 newFiftyMoveProximity = 0;
             }
-            
+
             // Finally, the piece is moved to the desired spot
-            (newBoard[fromX, fromY], newBoard[toX, toY]) = (0, pieceToMove);
+            newBoard[fromX, fromY] = 0;
+            newBoard[toX, toY] = pieceToMove;
 
             return new Position(newBoard, newToMove, newFiftyMoveProximity, newCastlingRights, newEnPassantSquare);
         }
@@ -213,42 +220,49 @@ namespace Chess
 
             int pieceToMove = board[fromX, fromY];
             int squareToMoveTo = board[toX, toY];
-            int colorIndication = pieceToMove * squareToMoveTo;
 
-            int moveDifX = fromX - toX;
-            int moveDifY = fromY - toY;
+            int moveDifX = toX - fromX;
+            int moveDifY = toY - fromY;
 
-            // Make sure the piece moved doesn't land on a friendly piece
-            if (colorIndication > 0) return false;
 
             // Test to see if any double pawn moves or pawn pushes are legal
             if (_isPawn(pieceToMove))
             {
-                if (moveDifY == 2 && !(fromY == 6))
+                if (moveDifX != 0)
                 {
-                    return false;
+                    if (squareToMoveTo * pieceToMove < 0)
+                    {
+                        return true;
+                    }
+
+                    if (enPassantSquare.Item1 == toX && enPassantSquare.Item2 == toY)
+                    {
+                        return true;
+                    }
                 }
-                else if (moveDifY == -2 && !(fromY == 1))
+                else
                 {
-                    return false;
+                    if (board[fromX, fromY + Math.Sign(moveDifY)] != 0)
+                    {
+                        return false;
+                    }
+                    if (moveDifY == 1 || moveDifY == -1) return true;
+                    if (moveDifY == 2 || moveDifY == -2) return squareToMoveTo == 0;
                 }
-                else if (enPassantSquare.Item1 == toX && enPassantSquare.Item2 == toY)
-                {
-                    return true;
-                }
-                else if ((moveDifX == 1 || moveDifX == -1) && colorIndication == 0)
-                {
-                    return false;
-                }
+
             }
 
             // If a king might want to castle, test if this is in accordance with the current castling rights
-            else if (_isKing(pieceToMove))
+            else if (_isKing(pieceToMove) && (moveDifX == 2 || moveDifX == -2))
             {
                 return _isLegalCastling(moveDifX, pieceToMove);
             }
+            else
+            {
+                return squareToMoveTo * pieceToMove <= 0;
+            }
 
-            return true;
+            return false;
         }
 
         #region Short aliases
@@ -282,7 +296,7 @@ namespace Chess
             if (king < 0)
             {
                 // Short castling
-                if (moveDifX == 2)
+                if (moveDifX == -2)
                 {
                     if (board[5, 0] == 0 && board[6, 0] == 0 && castlingRights[1])
                     {
@@ -290,7 +304,7 @@ namespace Chess
                     }
                 }
                 // Long castling
-                else if (moveDifX == -2)
+                else if (moveDifX == 2)
                 {
                     if (board[1, 0] == 0 && board[2, 0] == 0 && board[3, 0] == 0 && castlingRights[3])
                     {
@@ -303,7 +317,7 @@ namespace Chess
             else
             {
                 // Short castling
-                if (moveDifX == 2)
+                if (moveDifX == -2)
                 {
                     if (board[5, 7] == 0 && board[6, 7] == 0 && castlingRights[0])
                     {
@@ -311,7 +325,7 @@ namespace Chess
                     }
                 }
                 // Long castling
-                else if (moveDifX == -2)
+                else if (moveDifX == 2)
                 {
                     if (board[1, 7] == 0 && board[2, 7] == 0 && board[3, 7] == 0 && castlingRights[2])
                     {
