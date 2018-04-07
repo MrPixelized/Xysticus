@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using Chess;
 
 namespace Interface
 {
@@ -51,9 +52,13 @@ namespace Interface
             bottomLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("bottom right corner");
             return bottomLine;
         }
-        public static string DrawPosition(int[,] board)
+        public static void DrawPosition(int[,] board)
         {
-            return ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine();
+            Console.WriteLine(ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine());
+        }
+        public static void DrawPosition(Position position)
+        {
+            DrawPosition(position.board);
         }
     }
 }
