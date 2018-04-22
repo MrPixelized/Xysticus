@@ -1,22 +1,47 @@
-﻿using System;
-
+using System;
+using Chess;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Interface
 {
     public class InputLoop
     {
+        #region Input functions
         private static void InputUciNewGame()
         {
             Console.WriteLine("pretending to set up new game...");
         }
-        private static void InputSetOption(string inputString)
+        private static void InputSetOption(IEnumerable<String> inputStringArray)
         {
             Console.WriteLine("pretending to set option...");
         }
-        private static void InputPosition(string inputString)
+        private static void InputPosition(string[] inputStringArray)
         {
-            string[] inputArray = inputString.Split(new string[] { " moves " }, StringSplitOptions.None);
-            Console.WriteLine("pretending to set position...");
+            Position position;
+            int moveLoopCursor;
+            if (inputStringArray[0] == "fen")
+            {
+                List<String> FENStringList = new List<String>();
+                for(int i = 1; i <= 6; i++)
+                {
+                    FENStringList.Add(inputStringArray[i]);
+                }
+                position = FENParser.ParseFEN(FENStringList);
+                moveLoopCursor = 7;
+            }
+            else
+            {
+                position = new Position();
+                moveLoopCursor = 2;
+            }
+            
+            while (moveLoopCursor < inputStringArray.Length)
+            {
+                // process inputStringArray[moveLoopCursor]
+                moveLoopCursor++;
+            }
+            ConsoleGraphics.DrawPosition(position);
         }
         private static void InputIsReady()
         {
@@ -28,7 +53,7 @@ namespace Interface
         }
         private static void InputQuit()
         {
-            Console.WriteLine("pretending to quit...");
+            Environment.Exit(1);
         }
         private static void InputStop()
         {
@@ -36,28 +61,39 @@ namespace Interface
         }
         private static void InputUci()
         {
-            Console.WriteLine("pretending to give some info...");
+            Console.WriteLine("id name Xysticus");
+            Console.WriteLine("id author Ischa Abraham, Jeroen van den Berg");
         }
-        private static void InputGo(string inputString)
+        private static void InputGo(IEnumerable<String> inputStringArray)
         {
             Console.WriteLine("pretending to search...");
         }
+        private static void InputUnknown(string inputString)
+        {
+            Console.WriteLine(String.Format("Unknown command: {0}", inputString));
+        }
+        #endregion
+
+        #region Main loop
         public static void AwaitInput()
         {
-            string inputString;
+            string[] inputStringArray;
             while (true)
             {
-                inputString = Console.ReadLine();
-                if (inputString == "ucinewgame") InputUciNewGame();
-                else if (inputString.StartsWith("setoption ")) InputSetOption(inputString.Substring(10));
-                else if (inputString.StartsWith("position ")) InputPosition(inputString.Substring(9));
-                else if (inputString == "isready") InputIsReady();
-                else if (inputString == "print") InputPrint();
-                else if (inputString == "quit") InputQuit();
-                else if (inputString == "stop") InputStop();
-                else if (inputString == "uci") InputUci();
-                else if (inputString.StartsWith("go ")) InputGo(inputString.Substring(3));
+                inputStringArray = Console.ReadLine().Split(' ');
+                IEnumerable<String> EnumerableInputStringArray = (IEnumerable<String>)inputStringArray;
+                if (inputStringArray[0] == "ucinewgame") InputUciNewGame();
+                else if (inputStringArray[0] == "setoption") InputSetOption(EnumerableInputStringArray.Skip(1));
+                else if (inputStringArray[0] == "position") InputPosition(EnumerableInputStringArray.Skip(1).ToArray());
+                else if (inputStringArray[0] == "isready") InputIsReady();
+                else if (inputStringArray[0] == "print") InputPrint();
+                else if (inputStringArray[0] == "quit") InputQuit();
+                else if (inputStringArray[0] == "stop") InputStop();
+                else if (inputStringArray[0] == "uci") InputUci();
+                else if (inputStringArray[0] == "go") InputGo(inputStringArray.Skip(1).ToArray());
+                else InputUnknown(inputStringArray[0]);
             }
         }
+        #endregion
     }
 }
