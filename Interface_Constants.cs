@@ -1,4 +1,4 @@
-﻿namespace Interface
+namespace Interface
 {
     internal static class Constants
     {
@@ -24,7 +24,39 @@
                 default: return " ";
             }
         }
-
+        public static int INVERSED_PIECE_REPRESENTATIONS(string pieceRepresentation) {
+            switch (pieceRepresentation)
+            {
+                case "P": return 1;
+                case "N": return 2;
+                case "B": return 3;
+                case "R": return 4;
+                case "Q": return 5;
+                case "K": return 6;
+                case "p": return -1;
+                case "n": return -2;
+                case "b": return -3;
+                case "r": return -4;
+                case "q": return -5;
+                case "k": return -6;
+                default: return 0;
+            }
+        }
+        public static int COORDINATE_TRANSFORMATION(char fileString)
+        {
+            switch (fileString)
+            {
+                case 'a': return 0;
+                case 'b': return 1;
+                case 'c': return 2;
+                case 'd': return 3;
+                case 'e': return 4;
+                case 'f': return 5;
+                case 'g': return 6;
+                case 'h': return 7;
+                default: return 0;
+            }
+        }
         public static string BORDER_GRAPHICS(string graphicsSpecification)
         {
             switch (graphicsSpecification)
