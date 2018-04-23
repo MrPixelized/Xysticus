@@ -19,7 +19,8 @@ namespace Interface
         private static void InputPosition(string[] inputStringArray)
         {
             Position position;
-            int moveLoopCursor;
+            int firstMove;
+
             if (inputStringArray[0] == "fen")
             {
                 List<String> FENStringList = new List<String>();
@@ -28,18 +29,22 @@ namespace Interface
                     FENStringList.Add(inputStringArray[i]);
                 }
                 position = FENParser.ParseFEN(FENStringList);
-                moveLoopCursor = 7;
+                firstMove = 8;
             }
             else
             {
                 position = new Position();
-                moveLoopCursor = 2;
+                firstMove = 2;
             }
-            
-            while (moveLoopCursor < inputStringArray.Length)
+
+            Move move;
+            string moveString;
+
+            for(int i = firstMove;  i < inputStringArray.Length; i++)
             {
-                // process inputStringArray[moveLoopCursor]
-                moveLoopCursor++;
+                moveString = inputStringArray[i];
+                move = new Move(Constants.COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), Constants.COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]));
+                position = position.MakeMove(move);
             }
             ConsoleGraphics.DrawPosition(position);
         }
