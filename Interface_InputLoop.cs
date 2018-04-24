@@ -16,7 +16,7 @@ namespace Interface
         {
             Console.WriteLine("pretending to set option...");
         }
-        private static void InputPosition(string[] inputStringArray)
+        private static void InputPosition(string[] inputStringArray, Game game)
         {
             Position position;
             int firstMove;
@@ -46,15 +46,15 @@ namespace Interface
                 move = new Move(Constants.COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), Constants.COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]));
                 position = position.MakeMove(move);
             }
-            ConsoleGraphics.DrawPosition(position);
+            game.currentPosition = position;
         }
         private static void InputIsReady()
         {
             Console.WriteLine("readyok");
         }
-        private static void InputPrint()
+        private static void InputPrint(Position gamePosition)
         {
-            Console.WriteLine("pretending to print...");
+            ConsoleGraphics.DrawPosition(gamePosition);
         }
         private static void InputQuit()
         {
@@ -80,7 +80,7 @@ namespace Interface
         #endregion
 
         #region Main loop
-        public static void AwaitInput()
+        public static void AwaitInput(Game game)
         {
             string[] inputStringArray;
             while (true)
@@ -89,9 +89,9 @@ namespace Interface
                 IEnumerable<String> EnumerableInputStringArray = (IEnumerable<String>)inputStringArray;
                 if (inputStringArray[0] == "ucinewgame") InputUciNewGame();
                 else if (inputStringArray[0] == "setoption") InputSetOption(EnumerableInputStringArray.Skip(1));
-                else if (inputStringArray[0] == "position") InputPosition(EnumerableInputStringArray.Skip(1).ToArray());
+                else if (inputStringArray[0] == "position") InputPosition(EnumerableInputStringArray.Skip(1).ToArray(), game);
                 else if (inputStringArray[0] == "isready") InputIsReady();
-                else if (inputStringArray[0] == "print") InputPrint();
+                else if (inputStringArray[0] == "print") InputPrint(game.currentPosition);
                 else if (inputStringArray[0] == "quit") InputQuit();
                 else if (inputStringArray[0] == "stop") InputStop();
                 else if (inputStringArray[0] == "uci") InputUci();
