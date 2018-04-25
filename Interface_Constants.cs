@@ -24,21 +24,21 @@ namespace Interface
                 default: return " ";
             }
         }
-        public static int INVERSED_PIECE_REPRESENTATIONS(string pieceRepresentation) {
+        public static int INVERSED_PIECE_REPRESENTATIONS(char pieceRepresentation) {
             switch (pieceRepresentation)
             {
-                case "P": return 1;
-                case "N": return 2;
-                case "B": return 3;
-                case "R": return 4;
-                case "Q": return 5;
-                case "K": return 6;
-                case "p": return -1;
-                case "n": return -2;
-                case "b": return -3;
-                case "r": return -4;
-                case "q": return -5;
-                case "k": return -6;
+                case 'P': return 1;
+                case 'N': return 2;
+                case 'B': return 3;
+                case 'R': return 4;
+                case 'Q': return 5;
+                case 'K': return 6;
+                case 'p': return -1;
+                case 'n': return -2;
+                case 'b': return -3;
+                case 'r': return -4;
+                case 'q': return -5;
+                case 'k': return -6;
                 default: return 0;
             }
         }
