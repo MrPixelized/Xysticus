@@ -143,7 +143,7 @@ namespace Chess
                     if (moveDifX == 2)
                     {
                         newBoard[fromX + 1, 0] = -4;
-                        newBoard[0, 7] = 0;
+                        newBoard[7, 0] = 0;
                     }
                     else if (moveDifX == -2)
                     {
