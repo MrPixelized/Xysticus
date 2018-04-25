@@ -28,7 +28,7 @@ namespace Interface
                 {
                     FENStringList.Add(inputStringArray[i]);
                 }
-                position = FENParser.ParseFEN(FENStringList);
+                position = FENParser.ParseFEN(FENStringList.ToArray());
                 firstMove = 8;
             }
             else
@@ -55,6 +55,7 @@ namespace Interface
         private static void InputPrint(Position gamePosition)
         {
             ConsoleGraphics.DrawPosition(gamePosition);
+            Console.WriteLine(String.Format("To move: {0}\nFifty move proximity: {1}", gamePosition.toMove, gamePosition.fiftyMoveProximity));
         }
         private static void InputQuit()
         {
