@@ -48,7 +48,7 @@ namespace Chess
 
                     // MINIMAX
                     bestEvaluation = Math.Max(bestEvaluation, evaluation);
-                    alpha = Math.Max(bestEvaluation, beta);
+                    alpha = Math.Max(bestEvaluation, alpha);
                     if (beta <= alpha) break;
                 }
             }
@@ -186,6 +186,7 @@ namespace Chess
                     else newBoard[toX, toY + 1] = 0;
                     newBoard[fromX, fromY] = 0;
                     newBoard[toX, toY] = pieceToMove;
+                    //Console.WriteLine("EPC");
                 }
 
                 if (moveDifY == 2)
@@ -278,7 +279,7 @@ namespace Chess
             }
         }
 
-        private static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
+        private static bool _isPiece(int squareContent) => (squareContent != 0);
 
         private static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
 
