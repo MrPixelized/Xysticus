@@ -90,11 +90,6 @@ namespace Interface
             int fiftyMoveProximity = Convert.ToInt32(fiftyMoveProximityString);
             return fiftyMoveProximity;
         }
-        private static int ParseMoveNumber(string moveNumberString)
-        {
-            int moveNumber = Convert.ToInt32(moveNumberString);
-            return moveNumber;
-        }
         #endregion
 
         #region Main function
@@ -105,8 +100,6 @@ namespace Interface
             bool[] castlingRights = ParseCastlingRights(FENStringArray[2]);
             Tuple<int, int> enPassantSquare = ParseEnPassantSquare(FENStringArray[3]);
             int fiftyMoveProximity = ParseFiftyMoveProximity(FENStringArray[4]);
-            int moveNumber = ParseMoveNumber(FENStringArray[5]);
-            Console.WriteLine(String.Format("Castling rights: {0}\nEn passant square: {1}\nFifty move proxmity: {2}\nMove number: {3}", castlingRights, enPassantSquare, fiftyMoveProximity, moveNumber));
             return new Position(board, toMove, fiftyMoveProximity, castlingRights, enPassantSquare);
         }
         #endregion
