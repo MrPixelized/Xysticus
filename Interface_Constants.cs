@@ -42,9 +42,9 @@ namespace Interface
                 default: return 0;
             }
         }
-        public static int COORDINATE_TRANSFORMATION(char fileString)
+        public static int COORDINATE_TRANSFORMATION(char fileChar)
         {
-            switch (fileString)
+            switch (fileChar)
             {
                 case 'a': return 0;
                 case 'b': return 1;
@@ -55,6 +55,21 @@ namespace Interface
                 case 'g': return 6;
                 case 'h': return 7;
                 default: return 0;
+            }
+        }
+        public static char INVERSED_COORDINATE_TRANSFORMATION(int fileNumber)
+        {
+            switch (fileNumber)
+            {
+                case 0: return 'a';
+                case 1: return 'b';
+                case 2: return 'c';
+                case 3: return 'd';
+                case 4: return 'e';
+                case 5: return 'f';
+                case 6: return 'g';
+                case 7: return 'h';
+                default: return '-';
             }
         }
         public static string BORDER_GRAPHICS(string graphicsSpecification)

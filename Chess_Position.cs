@@ -28,15 +28,13 @@ namespace Chess
 
             if (depth <= 1)
             {
-                Interface.ConsoleGraphics.DrawPosition(board);
                 return (float)new Random().NextDouble();
             }
 
             // Maximizing player
-            if (toMove == WHITE)
+            if (toMove == 1)
             {
                 bestEvaluation = -100;
-
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
@@ -59,7 +57,6 @@ namespace Chess
             else
             {
                 bestEvaluation = 100;
-
                 foreach ((Position position, Move move) in GeneratePositions())
                 {
                     // If a king can be captured in this position, make sure that the engine never chooses this position
@@ -212,8 +209,8 @@ namespace Chess
             int moveDifX = toX - fromX;
             int moveDifY = toY - fromY;
 
-            int[,] newBoard = (int[,]) board.Clone();
-            bool[] newCastlingRights = (bool[]) castlingRights.Clone();
+            int[,] newBoard = (int[,])board.Clone();
+            bool[] newCastlingRights = (bool[])castlingRights.Clone();
             int newToMove = -1 * toMove;
             int newFiftyMoveProximity = fiftyMoveProximity + 1;
             Tuple<int, int> newEnPassantSquare = new Tuple<int, int>(-1, -1);
