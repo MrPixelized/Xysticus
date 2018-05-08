@@ -23,6 +23,25 @@ namespace Chess
 {
     static class Constants
     {
+        public const int BLACK = -1;
+        public const int WHITE = 1;
+
+        public const int EMPTY_SQUARE = 0;
+
+        public const int WHITE_PAWN = 1;
+        public const int WHITE_KNIGHT = 2;
+        public const int WHITE_BISHOP = 3;
+        public const int WHITE_ROOK = 4;
+        public const int WHITE_QUEEN = 5;
+        public const int WHITE_KING = 6;
+
+        public const int BLACK_PAWN = -1;
+        public const int BLACK_KNIGHT = -2;
+        public const int BLACK_BISHOP = -3;
+        public const int BLACK_ROOK = -4;
+        public const int BLACK_QUEEN = -5;
+        public const int BLACK_KING = -6;
+
         public static readonly int[,] STANDARD_POSITION = new int[8, 8] {
             {-4,-1,0,0,0,0,1,4},
             {-2,-1,0,0,0,0,1,2},

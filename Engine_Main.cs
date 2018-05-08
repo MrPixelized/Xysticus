@@ -6,12 +6,22 @@ public class Engine
 {
     static void Main()
     {
-        Position a = new Position();
+        int[,] b = new int[8, 8] {
+            {0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0},
+            {0,0,1,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,1,0},
+            {0,0,0,0,0,0,0,0},
+            {0,0,0,0,0,0,0,0}
+        };
+    Position a = new Position(b);
 
         System.Diagnostics.Stopwatch watch = new System.Diagnostics.Stopwatch();
 
 
-        for (int c=8; c<=8; c++)
+        for (int c=3; c<=3; c++)
         {
             watch.Start();
             Console.WriteLine(string.Format("Evaluation: {0}", a.FindBestMove(c, -2, 2)));

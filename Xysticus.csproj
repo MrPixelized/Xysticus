@@ -57,7 +57,7 @@
     <Compile Include="Engine_Main.cs" />
     <Compile Include="Chess_Position.cs" />
     <Compile Include="Interface_FENParser.cs" />
-    <Compile Include="Interface_InputLoop.cs" />
+    <None Include="Interface_InputLoop.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>
