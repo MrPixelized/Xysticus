@@ -11,6 +11,7 @@ namespace Interface
     public class UCIProtocol
     {
         public static Engine engine;
+        public static Position currentPosition;
 
         #region Input functions
         private static void InputUciNewGame()
@@ -23,8 +24,35 @@ namespace Interface
         }
         private static void InputPosition(string[] inputStringArray)
         {
-            engine.SetPosition(inputStringArray);
-            InputPrint();
+            Position position;
+            int firstMove;
+
+            if (inputStringArray[0] == "fen")
+            {
+                List<String> FENStringList = new List<String>();
+                for (int i = 1; i <= 6; i++)
+                {
+                    FENStringList.Add(inputStringArray[i]);
+                }
+                position = FENParser.ParseFEN(FENStringList.ToArray());
+                firstMove = 8;
+            }
+            else
+            {
+                position = new Position();
+                firstMove = 2;
+            }
+
+            Move move;
+            string moveString;
+
+            for (int i = firstMove; i < inputStringArray.Length; i++)
+            {
+                moveString = inputStringArray[i];
+                move = new Move(Interface.Constants.COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), Interface.Constants.COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]));
+                position = position.MakeMove(move);
+            }
+            currentPosition = position;
         }
         private static void InputIsReady()
         {
@@ -32,7 +60,7 @@ namespace Interface
         }
         private static void InputPrint()
         {
-            Position gamePosition = engine.GetPosition();
+            Position gamePosition = currentPosition;
             ConsoleGraphics.DrawPosition(gamePosition);
             Console.WriteLine(String.Format("To move: {0}\nCastling rights: {0}\nEn passant square: {1}\nFifty move proxmity: {2}", gamePosition.toMove, gamePosition.castlingRights, gamePosition.enPassantSquare, gamePosition.fiftyMoveProximity));
         }
@@ -52,12 +80,12 @@ namespace Interface
         }
         private static void InputGo(IEnumerable<String> inputStringArray)
         {
-            Move engineMove = engine.FindBestMove();
+            Move bestMove = engine.FindBestMove(currentPosition, 1, 2.0f, -2.0f);
             StringBuilder moveStringBuilder = new StringBuilder();
-            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(engineMove.fromX));
-            moveStringBuilder.Append(8 - engineMove.fromY);
-            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(engineMove.toX));
-            moveStringBuilder.Append(8 - engineMove.toY);
+            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
+            moveStringBuilder.Append(8 - bestMove.fromY);
+            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(bestMove.toX));
+            moveStringBuilder.Append(8 - bestMove.toY);
             string moveString = moveStringBuilder.ToString();
             Console.WriteLine("bestmove " + moveString);
             /*
