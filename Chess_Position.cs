@@ -20,64 +20,6 @@ namespace Chess
             this.castlingRights = castlingRights ?? Constants.STANDARD_CASTLING_RIGHTS;
             this.enPassantSquare = enPassantSquare ?? new Tuple<int, int>(-1, -1);
         }
-
-        public float FindBestMove(int depth, float alpha, float beta)
-        {
-            float bestEvaluation;
-            float evaluation;
-
-            if (depth <= 1)
-            {
-                return (float)new Random().NextDouble();
-            }
-
-            // Maximizing player
-            if (toMove == 1)
-            {
-                bestEvaluation = -100;
-                foreach ((Position position, Move move) in GeneratePositions())
-                {
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                        return -3;
-                    }
-
-                    // If the requested depth has not yet been reached, generate another layer of positions
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-
-                    // MINIMAX
-                    bestEvaluation = Math.Max(bestEvaluation, evaluation);
-                    alpha = Math.Max(bestEvaluation, alpha);
-                    if (beta <= alpha) break;
-                }
-            }
-
-            // Minimizing player
-            else
-            {
-                bestEvaluation = 100;
-                foreach ((Position position, Move move) in GeneratePositions())
-                {
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                         return 3;
-                    }
-
-                    // If the requested depth has not yet been reached, generate another layer of positions
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-
-                    // MINIMAX
-                    bestEvaluation = Math.Min(bestEvaluation, evaluation);
-                    beta = Math.Min(bestEvaluation, beta);
-                    if (beta <= alpha) break;
-                }
-            }
-
-            return bestEvaluation;
-        }
-
         public IEnumerable<(Position, Move)> GeneratePositions()
         {
             // Iterate through each square on the board
@@ -94,7 +36,7 @@ namespace Chess
                             int toX = x + moveX * m;
                             int toY = y + moveY * m;
                             Move currentMove = new Move(x, y, toX, toY);
-                            
+
                             // Test if the current move being computed is possible, disregarding checks.
                             if (!IsLegalMove(currentMove)) break;
 
@@ -102,7 +44,7 @@ namespace Chess
                             if (_isKing(board[toX, toY])) yield return (null, currentMove);
 
                             yield return (MakeMove(currentMove), currentMove);
-                            
+
                             // Quit yielding new positions if the piece is a pawn, king, or knight, or if a capture has occured
                             if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent)) break;
                             if (_isPiece(board[toX, toY])) break;
@@ -125,12 +67,12 @@ namespace Chess
             int moveDifX = toX - fromX;
             int moveDifY = toY - fromY;
 
-            int[,] newBoard = (int[,]) board.Clone();
-            bool[] newCastlingRights = (bool[]) castlingRights.Clone();
+            int[,] newBoard = (int[,])board.Clone();
+            bool[] newCastlingRights = (bool[])castlingRights.Clone();
             int newToMove = -1 * toMove;
             int newFiftyMoveProximity = fiftyMoveProximity + 1;
             Tuple<int, int> newEnPassantSquare = new Tuple<int, int>(-1, -1);
-            
+
             // If this move is a capturing move, reset the fifty move proximity.
             if (_isPiece(squareToMoveTo)) newFiftyMoveProximity = 0;
 
@@ -186,7 +128,6 @@ namespace Chess
                     else newBoard[toX, toY + 1] = 0;
                     newBoard[fromX, fromY] = 0;
                     newBoard[toX, toY] = pieceToMove;
-                    //Console.WriteLine("EPC");
                 }
 
                 if (moveDifY == 2)
@@ -243,6 +184,7 @@ namespace Chess
                 }
                 else
                 {
+                    if (Math.Abs(moveDifY) == 2 && !(fromY == 1 || fromY == 6)) return false;
                     if (board[fromX, fromY + Math.Sign(moveDifY)] != 0)
                     {
                         return false;
@@ -279,7 +221,7 @@ namespace Chess
             }
         }
 
-        private static bool _isPiece(int squareContent) => (squareContent != 0);
+        private static bool _isPiece(int squareContent) => (-7 < squareContent && squareContent < 0) || (0 < squareContent && squareContent < 7);
 
         private static bool _isPawn(int squareContent) => squareContent == 1 || squareContent == -1;
 
