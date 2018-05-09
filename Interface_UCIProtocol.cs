@@ -1,10 +1,9 @@
 using System;
 using Chess;
-using ChessEngine;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Collections.Generic;
+using static Interface.Constants;
 
 namespace Interface
 {
@@ -49,7 +48,7 @@ namespace Interface
             for (int i = firstMove; i < inputStringArray.Length; i++)
             {
                 moveString = inputStringArray[i];
-                move = new Move(Interface.Constants.COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), Interface.Constants.COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]));
+                move = new Move(COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]), position.board[COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1])]);
                 position = position.MakeMove(move);
             }
             currentPosition = position;
@@ -80,11 +79,11 @@ namespace Interface
         }
         private static void InputGo(IEnumerable<String> inputStringArray)
         {
-            Move bestMove = engine.FindBestMove(currentPosition, 1, 2.0f, -2.0f);
+            Move bestMove = engine.FindBestMove(currentPosition, 1, alpha: -2.0f, beta: 2.0f).Item1;
             StringBuilder moveStringBuilder = new StringBuilder();
-            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
+            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
             moveStringBuilder.Append(8 - bestMove.fromY);
-            moveStringBuilder.Append(Constants.INVERSED_COORDINATE_TRANSFORMATION(bestMove.toX));
+            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.toX));
             moveStringBuilder.Append(8 - bestMove.toY);
             string moveString = moveStringBuilder.ToString();
             Console.WriteLine("bestmove " + moveString);
