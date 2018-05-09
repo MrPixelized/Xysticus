@@ -70,7 +70,7 @@ namespace Interface
             if (CastlingRightsString.Contains("k")) castlingRights[1] = true;
             if (CastlingRightsString.Contains("Q")) castlingRights[2] = true;
             if (CastlingRightsString.Contains("q")) castlingRights[3] = true;
-            return null;
+            return castlingRights;
         }
         private static Tuple<int, int> ParseEnPassantSquare(string enPassantSquareString)
         {
