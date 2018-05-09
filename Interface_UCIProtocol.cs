@@ -1,5 +1,6 @@
 using System;
 using Chess;
+using static Chess.Constants;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
@@ -49,6 +50,17 @@ namespace Interface
             {
                 moveString = inputStringArray[i];
                 move = new Move(COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]), position.board[COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1])]);
+                if (moveString.Length >= 5)
+                {
+                    if (position.toMove == WHITE)
+                    {
+                        move.newPiece = INVERSED_PIECE_REPRESENTATIONS(Char.ToUpper(moveString[4]));
+                    }
+                    else
+                    {
+                        move.newPiece = INVERSED_PIECE_REPRESENTATIONS(moveString[4]);
+                    }
+                }
                 position = position.MakeMove(move);
             }
             currentPosition = position;
@@ -79,7 +91,7 @@ namespace Interface
         }
         private static void InputGo(IEnumerable<String> inputStringArray)
         {
-            Move bestMove = engine.FindBestMove(currentPosition, 1, alpha: -2.0f, beta: 2.0f).Item1;
+            Move bestMove = engine.FindBestMove(currentPosition, 3, alpha: -2.0f, beta: 2.0f).Item1;
             StringBuilder moveStringBuilder = new StringBuilder();
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
             moveStringBuilder.Append(8 - bestMove.fromY);
