@@ -21,29 +21,18 @@ namespace Chess
             //Clear all data saved about the game
         }
 
-        public (Move, float) FindBestMove(Position currentPosition, int depth, float alpha, float beta)
+        public (Move, float) FindBestMove(Position currentPosition, List<(Position, Move)> positionMoveTupleList, int depth, float alpha, float beta)
         {
-            /*
-            List<(Position, Move)> moveList = currentPosition.GeneratePositions().ToList();
-            Random rnd = new Random();
-            Move bestMove = moveList[rnd.Next(1, moveList.Count())].Item2;
-            return bestMove;
-            */
-
             List<(Move, float)> moveEvaluationTupleList = new List<(Move, float)>();
+            List<(Position, Move)> nextPositionMoveTupleList;
             float bestEvaluation;
             // Maximizing player
             if (currentPosition.toMove == WHITE)
             {
                 bestEvaluation = -100;
-                foreach ((Position position, Move move) in currentPosition.GeneratePositions())
+                foreach ((Position position, Move move) in positionMoveTupleList)
                 {
                     //Console.WriteLine(String.Format("{0}White here, now looking into {1}, {2} to {3}, {4}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY));
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                        return (move, 100);
-                    }
 
                     // If the requested depth has not yet been reached, generate another layer of positions
                     if (depth == 0)
@@ -52,16 +41,29 @@ namespace Chess
                     }
                     else
                     {
-                        moveEvaluationTupleList.Add((move, FindBestMove(position, depth - 1, alpha, beta).Item2));
+                        nextPositionMoveTupleList = position.GeneratePositions();
+                        if (nextPositionMoveTupleList.Count == 0)
+                        {
+                            moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        }
+                        else if (nextPositionMoveTupleList.Last().Item1 != null)
+                        {
+                            moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                        }
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
                     // MINIMAX
-                    bestEvaluation = Math.Max(bestEvaluation, moveEvaluationTupleList.Last().Item2);
-                    alpha = Math.Max(bestEvaluation, alpha);
-                    if (beta <= alpha)
+                    if (moveEvaluationTupleList.Count != 0)
                     {
-                        //Console.WriteLine("beta <= alpha, so we're breaking.");
-                        break;
+                        bestEvaluation = Math.Max(bestEvaluation, moveEvaluationTupleList.Last().Item2);
+                        alpha = Math.Max(bestEvaluation, alpha);
+                        if (beta <= alpha) break;
+                    }
+                    if (moveEvaluationTupleList.Count == 0)
+                    {
+                        //This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
+                        //In this case, it's safe to return a random move and the evaluation for the final position.
+                        return (positionMoveTupleList.Last().Item2, (float)evaluationFunction.NextDouble());
                     }
                 }
                 moveEvaluationTupleList.Sort((x, y) => y.Item2.CompareTo(x.Item2));
@@ -70,28 +72,41 @@ namespace Chess
             else
             {
                 bestEvaluation = 100;
-                foreach ((Position position, Move move) in currentPosition.GeneratePositions())
+                foreach ((Position position, Move move) in positionMoveTupleList)
                 {
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                        return (move, -100);
-                    }
+                    //Console.WriteLine(String.Format("{0}White here, now looking into {1}, {2} to {3}, {4}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY));
 
                     // If the requested depth has not yet been reached, generate another layer of positions
                     if (depth == 0)
                     {
                         moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
-                        //Console.WriteLine(String.Format("{0}The random value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
                     else
                     {
-                        moveEvaluationTupleList.Add((move, FindBestMove(position, depth - 1, alpha, beta).Item2));
+                        nextPositionMoveTupleList = position.GeneratePositions();
+                        if (nextPositionMoveTupleList.Count == 0)
+                        {
+                            moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        }
+                        else if (nextPositionMoveTupleList.Last().Item1 != null)
+                        {
+                            moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                        }
+                        //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
                     // MINIMAX
-                    bestEvaluation = Math.Min(bestEvaluation, moveEvaluationTupleList.Last().Item2);
-                    beta = Math.Min(bestEvaluation, beta);
-                    if (beta <= alpha) break;
+                    if (moveEvaluationTupleList.Count != 0)
+                    {
+                        bestEvaluation = Math.Min(bestEvaluation, moveEvaluationTupleList.Last().Item2);
+                        beta = Math.Min(bestEvaluation, beta);
+                        if (beta <= alpha) break;
+                    }
+                    if (moveEvaluationTupleList.Count == 0)
+                    {
+                        //This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
+                        //In this case, it's safe to return a random move and the evaluation for the final position.
+                        return (positionMoveTupleList.Last().Item2, (float)evaluationFunction.NextDouble());
+                    }
                 }
                 moveEvaluationTupleList.Sort((x, y) => x.Item2.CompareTo(y.Item2));
             }
@@ -99,9 +114,7 @@ namespace Chess
             {
                 //Console.WriteLine(String.Format("{0}The move {1},{2} to {3},{4} has an evaluation of {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, evaluation));
             }
-            (Move, float) bestMoveEvaluationTuple = moveEvaluationTupleList[0];
-            return (bestMoveEvaluationTuple);
+            return moveEvaluationTupleList[0];
         }
     }
 }
- 
