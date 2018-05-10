@@ -101,12 +101,16 @@ namespace Interface
                 }
             }
             List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
-            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, depth, alpha: -2.0f, beta: 2.0f).Item1;
+            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, 1, alpha: -2.0f, beta: 2.0f).Item1;
             StringBuilder moveStringBuilder = new StringBuilder();
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
             moveStringBuilder.Append(8 - bestMove.fromY);
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.toX));
             moveStringBuilder.Append(8 - bestMove.toY);
+            if (bestMove.newPiece != bestMove.pieceToMove)
+            {
+                moveStringBuilder.Append(PIECE_REPRESENTATIONS(bestMove.newPiece).ToLower());
+            }
             string moveString = moveStringBuilder.ToString();
             Console.WriteLine("bestmove " + moveString);
             /*
