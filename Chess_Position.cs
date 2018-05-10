@@ -20,67 +20,11 @@ namespace Chess
             this.castlingRights = castlingRights ?? STANDARD_CASTLING_RIGHTS;
             this.enPassantSquare = enPassantSquare ?? new Tuple<int, int>(-1, -1);
         }
-
-        public float FindBestMove(int depth, float alpha, float beta)
+        public List<(Position, Move)> GeneratePositions()
         {
-            float bestEvaluation;
-            float evaluation;
-
-            if (depth <= 1)
+            List<(Position, Move)> positionMoveList = new List<(Position, Move)>();
+            if (toMove == WHITE)
             {
-                return (float)new Random().NextDouble();
-            }
-
-            // Maximizing player
-            if (toMove == 1)
-            {
-                bestEvaluation = -100;
-                foreach ((Position position, Move move) in GeneratePositions())
-                {
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                        return -3;
-                    }
-
-                    // If the requested depth has not yet been reached, generate another layer of positions
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-
-                    // MINIMAX
-                    bestEvaluation = Math.Max(bestEvaluation, evaluation);
-                    alpha = Math.Max(bestEvaluation, alpha);
-                    if (beta <= alpha) break;
-                }
-            }
-
-            // Minimizing player
-            else
-            {
-                bestEvaluation = 100;
-                foreach ((Position position, Move move) in GeneratePositions())
-                {
-                    // If a king can be captured in this position, make sure that the engine never chooses this position
-                    if (position == null)
-                    {
-                         return 3;
-                    }
-
-                    // If the requested depth has not yet been reached, generate another layer of positions
-                    evaluation = position.FindBestMove(depth - 1, alpha, beta);
-
-                    // MINIMAX
-                    bestEvaluation = Math.Min(bestEvaluation, evaluation);
-                    beta = Math.Min(bestEvaluation, beta);
-                    if (beta <= alpha) break;
-                }
-            }
-
-            return bestEvaluation;
-        }
-
-        public IEnumerable<(Position, Move)> GeneratePositions()
-        {
-            if (toMove == WHITE) {
                 // Iterate through each square on the board
                 foreach ((int squareContent, int x, int y) in _iteratePosition())
                 {
@@ -95,17 +39,24 @@ namespace Chess
                                 Move currentMove;
                                 int toX = x + moveX * m;
                                 int toY = y + moveY * m;
-                                if (_isPawn(squareContent)) {
+                                if (_isPawn(squareContent))
+                                {
                                     if (toX == enPassantSquare.Item1 && toY == enPassantSquare.Item2)
                                     {
                                         currentMove = new Move(x, y, toX, toY, squareContent, 0, true);
                                     }
                                     else if (toY == 0)
                                     {
-                                        for (int piece = 2; piece <= 5; piece++) {
+                                        for (int piece = 2; piece <= 5; piece++)
+                                        {
                                             currentMove = new Move(x, y, toX, toY, squareContent, piece, false);
                                             if (!IsLegalMove(currentMove)) break;
-                                            yield return (MakeMove(currentMove), currentMove);
+                                            if (_isKing(board[toX, toY]))
+                                            {
+                                                positionMoveList.Add((null, currentMove));
+                                                return positionMoveList;
+                                            }
+                                            positionMoveList.Add((MakeMove(currentMove), currentMove));
                                         }
                                         break;
                                     }
@@ -118,15 +69,19 @@ namespace Chess
                                 {
                                     currentMove = new Move(x, y, toX, toY, squareContent);
                                 }
-                            
+
                                 // Test if the current move being computed is possible, disregarding checks
                                 if (!IsLegalMove(currentMove)) break;
 
-                                // If the square this piece is about to land on is a king, recognise that this move is illegal by returning null
-                                if (_isKing(board[toX, toY])) yield return (null, currentMove);
+                                // If the square this piece is about to land on is a king, recognise that this position is illegal by returning null
+                                if (_isKing(board[toX, toY]))
+                                {
+                                    positionMoveList.Add((null, currentMove));
+                                    return positionMoveList;
+                                }
 
-                                yield return (MakeMove(currentMove), currentMove);
-                            
+                                positionMoveList.Add((MakeMove(currentMove), currentMove));
+
                                 // Quit yielding new positions if the piece is a pawn, king, or knight, or if a capture has occured
                                 if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent)) break;
                                 if (_isPiece(board[toX, toY])) break;
@@ -157,13 +112,18 @@ namespace Chess
                                     {
                                         currentMove = new Move(x, y, toX, toY, squareContent, 0, true);
                                     }
-                                    else if (toY == 0)
+                                    else if (toY == 7)
                                     {
                                         for (int piece = -2; piece >= -5; piece--)
                                         {
                                             currentMove = new Move(x, y, toX, toY, squareContent, piece, false);
                                             if (!IsLegalMove(currentMove)) break;
-                                            yield return (MakeMove(currentMove), currentMove);
+                                            if (_isKing(board[toX, toY]))
+                                            {
+                                                positionMoveList.Add((null, currentMove));
+                                                return positionMoveList;
+                                            }
+                                            positionMoveList.Add((MakeMove(currentMove), currentMove));
                                         }
                                         break;
                                     }
@@ -180,10 +140,14 @@ namespace Chess
                                 // Test if the current move being computed is possible, disregarding checks
                                 if (!IsLegalMove(currentMove)) break;
 
-                                // If the square this piece is about to land on is a king, recognise that this move is illegal by returning null
-                                if (_isKing(board[toX, toY])) yield return (null, currentMove);
+                                // If the square this piece is about to land on is a king, recognise that this position is illegal by returning null
+                                if (_isKing(board[toX, toY]))
+                                {
+                                    positionMoveList.Add((null, currentMove));
+                                    return positionMoveList;
+                                }
 
-                                yield return (MakeMove(currentMove), currentMove);
+                                positionMoveList.Add((MakeMove(currentMove), currentMove));
 
                                 // Quit yielding new positions if the piece is a pawn, king, or knight, or if a capture has occured
                                 if (_isKing(squareContent) || _isKnight(squareContent) || _isPawn(squareContent)) break;
@@ -193,6 +157,7 @@ namespace Chess
                     }
                 }
             }
+            return positionMoveList;
         }
 
         public Position MakeMove(Move move)
@@ -214,7 +179,7 @@ namespace Chess
             int newToMove = -1 * toMove;
             int newFiftyMoveProximity = fiftyMoveProximity + 1;
             Tuple<int, int> newEnPassantSquare = new Tuple<int, int>(-1, -1);
-            
+
             // If this move is a capturing move, reset the fifty move proximity
             if (_isPiece(squareToMoveTo)) newFiftyMoveProximity = 0;
 
@@ -254,7 +219,7 @@ namespace Chess
             // Altering the castling rights upon a rook move
             if (_isRook(pieceToMove))
             {
-                if      (fromX == 0 || fromY == 0) newCastlingRights[3] = false;
+                if (fromX == 0 || fromY == 0) newCastlingRights[3] = false;
                 else if (fromX == 0 || fromY == 7) newCastlingRights[2] = false;
                 else if (fromX == 7 || fromY == 0) newCastlingRights[1] = false;
                 else if (fromX == 7 || fromY == 7) newCastlingRights[0] = false;
@@ -306,12 +271,14 @@ namespace Chess
             int moveDifX = toX - fromX;
             int moveDifY = toY - fromY;
 
-            if (toMove == BLACK) {
+            if (toMove == BLACK)
+            {
 
                 // Test to see if any double pawn moves or pawn pushes are legal
                 if (_isPawn(pieceToMove))
                 {
-                    if (moveDifY == 2) {
+                    if (moveDifY == 2)
+                    {
                         return board[fromX, fromY + 1] == 0 && squareToMoveTo == 0 && fromY == 1;
                     }
                     else if (moveDifX == 0)
@@ -339,7 +306,7 @@ namespace Chess
                 }
                 else
                 {
-                    return squareToMoveTo <= 0;
+                    return squareToMoveTo >= 0;
                 }
             }
             else
@@ -376,7 +343,7 @@ namespace Chess
                 }
                 else
                 {
-                    return squareToMoveTo >= 0;
+                    return squareToMoveTo <= 0;
                 }
             }
             return false;
@@ -450,12 +417,8 @@ namespace Chess
                     }
                 }
             }
-
             return false;
         }
-
         #endregion
-
     }
-
 }
