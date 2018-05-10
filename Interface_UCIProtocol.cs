@@ -89,9 +89,19 @@ namespace Interface
                 "id author Ischa Abraham, Jeroen van den Berg\n" +
                 "uciok");
         }
-        private static void InputGo(IEnumerable<String> inputStringArray)
+        private static void InputGo(string[] inputStringArray)
         {
-            Move bestMove = engine.FindBestMove(currentPosition, 3, alpha: -2.0f, beta: 2.0f).Item1;
+            int depth = 3;
+
+            for(int i = 0; i < inputStringArray.Length; i++)
+            {
+                if (inputStringArray[i] == "depth")
+                {
+                    depth = int.Parse(inputStringArray[i + 1]);
+                }
+            }
+            List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
+            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, depth, alpha: -2.0f, beta: 2.0f).Item1;
             StringBuilder moveStringBuilder = new StringBuilder();
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
             moveStringBuilder.Append(8 - bestMove.fromY);
