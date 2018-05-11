@@ -26,30 +26,48 @@ namespace Chess
             List<(Move, float)> moveEvaluationTupleList = new List<(Move, float)>();
             List<(Position, Move)> nextPositionMoveTupleList;
             float bestEvaluation;
+            bool lastMoveWasLegal = false;
             // Maximizing player
             if (currentPosition.toMove == WHITE)
             {
                 bestEvaluation = -100;
                 foreach ((Position position, Move move) in positionMoveTupleList)
                 {
-                    //Console.WriteLine(String.Format("{0}White here, now looking into {1}, {2} to {3}, {4}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY));
+                    if (move.pieceToMove == WHITE_KING && (move.toX - move.fromX == 2 || move.toX - move.fromX == -2))
+                    //If the white king wants to castle, there is a couple things we need to check first.
+                    {
+                        if (!(lastMoveWasLegal && !currentPosition.IsInCheck()))
+                        {
+                            continue;
+                        }
+                    }
 
-                    // If the requested depth has not yet been reached, generate another layer of positions
+                    lastMoveWasLegal = false;
+                    //Console.WriteLine(String.Format("{0}White here, now looking into {1}, {2} to {3}, {4}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY));
+                    //Generate positions for the second generation of child nodes from here.
+                    //This is necessary to get rid of illegal moves in the first generation of child nodes.
                     nextPositionMoveTupleList = position.GeneratePositions();
                     if (nextPositionMoveTupleList.Count == 0)
                     {
+                        //After the most recent legal move, there are no pseudo-legal moves and the game has ended.
                         moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        lastMoveWasLegal = true;
+                        //Interface.ConsoleGraphics.DrawPosition(position);
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
                     else if (nextPositionMoveTupleList.Last().Item1 != null)
+                    //The most recent pseudo-legal move does not allow a king to be captured. 
                     {
-                        if (depth <= 0)
+                        lastMoveWasLegal = true;
+                        if (depth == 0)
                         {
                             moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                            //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         else
                         {
                             moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
@@ -75,24 +93,37 @@ namespace Chess
                 bestEvaluation = 100;
                 foreach ((Position position, Move move) in positionMoveTupleList)
                 {
+                    if (move.pieceToMove == BLACK_KING && (move.toX - move.fromX == 2 || move.toX - move.fromX == -2))
+                    //If the black king wants to castle, there is a couple things we need to check first.
+                    {
+                        if (!(lastMoveWasLegal && !currentPosition.IsInCheck()))
+                        {
+                            continue;
+                        }
+                    }
                     //Console.WriteLine(String.Format("{0}Black here, now looking into {1}, {2} to {3}, {4}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY));
 
                     // If the requested depth has not yet been reached, generate another layer of positions
                     nextPositionMoveTupleList = position.GeneratePositions();
                     if (nextPositionMoveTupleList.Count == 0)
                     {
+                        //After the most recent legal move, there are no pseudo-legal moves and the game has ended. 
                         moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        //Interface.ConsoleGraphics.DrawPosition(position);
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
-                    else if (nextPositionMoveTupleList.Last().Item1 != null) //if the king cannot be captured in position
+                    else if (nextPositionMoveTupleList.Last().Item1 != null)
+                    //The pseudo-legal move we're investigating does not allow a king to be captured. 
                     {
-                        if (depth <= 0)
+                        if (depth == 0)
                         {
                             moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                            //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         else
                         {
                             moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
