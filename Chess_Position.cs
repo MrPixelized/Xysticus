@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Chess.Constants;
 
 namespace Chess
@@ -11,6 +12,7 @@ namespace Chess
         public int[,] board;
         public bool[] castlingRights;
         public Tuple<int, int> enPassantSquare;
+        public bool? inCheck;
 
         public Position(int[,] board = null, int toMove = 1, int fiftyMoveProximity = 0, bool[] castlingRights = null, Tuple<int, int> enPassantSquare = null)
         {
@@ -300,9 +302,9 @@ namespace Chess
                 }
 
                 // If a king might want to castle, test if this is in accordance with the current castling rights
-                else if (_isKing(pieceToMove) && (moveDifX == 2 || moveDifX == -2))
+                else if (pieceToMove == BLACK_KING && (moveDifX == 2 || moveDifX == -2))
                 {
-                    return _isLegalCastling(moveDifX, pieceToMove);
+                    return _isLegalCastling(moveDifX, BLACK);
                 }
                 else
                 {
@@ -337,15 +339,28 @@ namespace Chess
                 }
 
                 // If a king might want to castle, test if this is in accordance with the current castling rights
-                else if (_isKing(pieceToMove) && (moveDifX == 2 || moveDifX == -2))
+                else if (pieceToMove == WHITE_KING && (moveDifX == 2 || moveDifX == -2))
                 {
-                    return _isLegalCastling(moveDifX, pieceToMove);
+                    return _isLegalCastling(moveDifX, WHITE);
                 }
                 else
                 {
                     return squareToMoveTo <= 0;
                 }
             }
+            return false;
+        }
+
+        public bool IsInCheck()
+        {
+            if (inCheck != null) return (bool)inCheck;
+            Position positionWithOppositeSideToMove = new Position()
+            {
+                toMove = -1 * this.toMove,
+                board = this.board
+            };
+            positionWithOppositeSideToMove.toMove *= -1;
+            if (positionWithOppositeSideToMove.GeneratePositions().Last().Item1 == null) return true;
             return false;
         }
 
@@ -374,13 +389,13 @@ namespace Chess
 
         private static bool _isOutOfBounds(int x, int y) => (x > 7 || x < 0 || y > 7 || y < 0);
 
-        private bool _isLegalCastling(int moveDifX, int king)
+        private bool _isLegalCastling(int moveDifX, int toMove)
         {
             // Black to castle
-            if (king == BLACK_KING)
+            if (toMove == BLACK)
             {
                 // Short castling
-                if (moveDifX == -2)
+                if (moveDifX == 2)
                 {
                     if (board[5, 0] == 0 && board[6, 0] == 0 && castlingRights[1])
                     {
@@ -388,7 +403,7 @@ namespace Chess
                     }
                 }
                 // Long castling
-                else if (moveDifX == 2)
+                else if (moveDifX == -2)
                 {
                     if (board[1, 0] == 0 && board[2, 0] == 0 && board[3, 0] == 0 && castlingRights[3])
                     {
@@ -396,12 +411,11 @@ namespace Chess
                     }
                 }
             }
-
             // White to castle
             else
             {
                 // Short castling
-                if (moveDifX == -2)
+                if (moveDifX == 2)
                 {
                     if (board[5, 7] == 0 && board[6, 7] == 0 && castlingRights[0])
                     {
@@ -409,7 +423,7 @@ namespace Chess
                     }
                 }
                 // Long castling
-                else if (moveDifX == 2)
+                else if (moveDifX == -2)
                 {
                     if (board[1, 7] == 0 && board[2, 7] == 0 && board[3, 7] == 0 && castlingRights[2])
                     {
