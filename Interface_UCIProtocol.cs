@@ -50,6 +50,10 @@ namespace Interface
             {
                 moveString = inputStringArray[i];
                 move = new Move(COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1]), COORDINATE_TRANSFORMATION(moveString[2]), 8 - (int)Char.GetNumericValue(moveString[3]), position.board[COORDINATE_TRANSFORMATION(moveString[0]), 8 - (int)Char.GetNumericValue(moveString[1])]);
+                if ((move.pieceToMove == WHITE_PAWN || move.pieceToMove == BLACK_PAWN) && move.toX == position.enPassantSquare.Item1 && move.toY == position.enPassantSquare.Item2)
+                {
+                    move.enPassantCapture = true;
+                }
                 if (moveString.Length >= 5)
                 {
                     if (position.toMove == WHITE)
@@ -128,6 +132,7 @@ namespace Interface
         #region Main loop
         public static void InputLoop()
         {
+            InputUci();
             string[] inputStringArray;
             while (true)
             {
