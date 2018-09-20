@@ -1,4 +1,4 @@
-namespace NeuralNetwork
+namespace NNLogic
 {
     public class NeuralNetwork
     {
