@@ -13,7 +13,26 @@ namespace Interface
         public static Engine engine;
         public static Position currentPosition;
 
+        #region Helper functions
+
+        private static String MoveToUCINotation(Move move)
+        {
+            StringBuilder moveStringBuilder = new StringBuilder();
+            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(move.fromX));
+            moveStringBuilder.Append(8 - move.fromY);
+            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(move.toX));
+            moveStringBuilder.Append(8 - move.toY);
+            if (move.newPiece != move.pieceToMove)
+            {
+                moveStringBuilder.Append(PIECE_REPRESENTATIONS(move.newPiece).ToLower());
+            }
+            return moveStringBuilder.ToString();
+        }
+
+        #endregion
+
         #region Input functions
+
         private static void InputUciNewGame()
         {
             Console.WriteLine("pretending to set up new game...");
@@ -105,17 +124,8 @@ namespace Interface
                 }
             }
             List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
-            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, 1, alpha: -2.0f, beta: 2.0f).Item1;
-            StringBuilder moveStringBuilder = new StringBuilder();
-            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.fromX));
-            moveStringBuilder.Append(8 - bestMove.fromY);
-            moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(bestMove.toX));
-            moveStringBuilder.Append(8 - bestMove.toY);
-            if (bestMove.newPiece != bestMove.pieceToMove)
-            {
-                moveStringBuilder.Append(PIECE_REPRESENTATIONS(bestMove.newPiece).ToLower());
-            }
-            string moveString = moveStringBuilder.ToString();
+            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, depth, alpha: -2.0f, beta: 2.0f).Item1;
+            String moveString = MoveToUCINotation(bestMove);
             Console.WriteLine("bestmove " + moveString);
             /*
             FindBestMoveThread = new Thread(() => game.currentPosition.FindBestMove(3, -2, 2));
