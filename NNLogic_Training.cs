@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NNLogic
 {
@@ -33,11 +34,7 @@ namespace NNLogic
 
         public void GenerateNextGeneration()
         {
-            float fitnessSum = 0;
-            for (int i = 0; i < fitnesses.Length; i++)
-            {
-                fitnessSum += fitnesses[i];
-            }
+            float fitnessSum = fitnesses.Sum();
 
             List<NeuralNetwork> nextPopulation = new List<NeuralNetwork>();
             for (int i = 0; i < population.Length; i++)
