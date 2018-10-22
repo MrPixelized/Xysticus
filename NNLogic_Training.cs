@@ -7,19 +7,22 @@ namespace NNLogic
     public class Training
     {
         public List<NeuralNetwork> population;
-        public float[] fitnesses;
         int generation;
         readonly int reproductionOrganismCount;
         readonly int maxGroupSize;
         readonly float selectionFactor;
+        readonly int populationSizeBeforeTrimming;
         readonly int populationSizeAfterTrimming;
         Random random;
 
-        public Training(List<NeuralNetwork> population, float[] fitnesses, int reproductionOrganismCount)
+        public Training(List<NeuralNetwork> population, int reproductionOrganismCount, int maxGroupSize, float selectionFactor, int populationSizeBeforeTrimming, int populationSizeAfterTrimming)
         {
             this.population = population;
-            this.fitnesses = fitnesses;
             this.reproductionOrganismCount = reproductionOrganismCount;
+            this.maxGroupSize = maxGroupSize;
+            this.selectionFactor = selectionFactor;
+            this.populationSizeAfterTrimming = populationSizeAfterTrimming;
+            this.populationSizeBeforeTrimming = populationSizeBeforeTrimming;
             random = new Random();
         }
 
@@ -68,24 +71,25 @@ namespace NNLogic
             }
         }
 
-        public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
-        {
-            // Return the strongest ceil(selectionFraction * nets.Count) nets
-            return (List<NeuralNetwork>)nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count)));
-        }
-
         public void GenerateNextGeneration()
         {
-            float fitnessSum = fitnesses.Sum();
-
-            List<NeuralNetwork> nextPopulation = new List<NeuralNetwork>();
-            for (int i = 0; i < population.Count; i++)
+            float fitnessSum = 0;
+            foreach (NeuralNetwork net in population)
+            {
+                fitnessSum += net.fitness;
+            }
+            while (population.Count < populationSizeBeforeTrimming)
             {
                 // Generate a new individual
                 List<NeuralNetwork> recombinationList = _pickNets(fitnessSum);
-                nextPopulation.Add(_crossover(recombinationList));
+                population.Add(_crossover(recombinationList));
             }
-            population = nextPopulation;
+        }
+
+        public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
+        {
+            // Return the strongest ceil(selectionFactor * nets.Count) nets
+            return (List<NeuralNetwork>)nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count)));
         }
 
         private List<NeuralNetwork> _pickNets(float fitnessSum)
@@ -98,10 +102,11 @@ namespace NNLogic
                 float temporaryFitnessSum = 0;
                 for (int j = 0; j < population.Count; j++)
                 {
-                    temporaryFitnessSum += fitnesses[j];
-                    if (fitnessSum <= temporaryFitnessSum)
+                    temporaryFitnessSum += population[j].fitness;
+                    if (fitnessIndex <= temporaryFitnessSum)
                     {
                         recombinationList.Add(population[j]);
+                        break;
                     }
                 }
             }
