@@ -3,9 +3,10 @@ using Chess;
 
 namespace NNLogic
 {
-    class NeuralNetwork
+    public class NeuralNetwork
     {
         public float[][] weights;
+        public float fitness;
         readonly int hiddenLayerCount;
         readonly int inputNodeCount;
         readonly int hiddenNodeCount;
