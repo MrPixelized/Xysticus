@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace NNLogic
 {
@@ -44,6 +45,8 @@ namespace NNLogic
 
         public void RemoveNets()
         {
+            // The selection process all networks have to go through to determine if they can reproduce.
+            // Status: finished, but has unfinished dependencies.
             List<List<NeuralNetwork>> groupList;
             while (population.Count > populationSizeAfterTrimming)
             {
@@ -56,7 +59,7 @@ namespace NNLogic
                 {
                     groupList.Add(new List<NeuralNetwork>());
                 }
-                // Add the networks to the groups
+                // Add the networks to the groups, looping at maxGroupSize.
                 for (int i = 0; i < population.Count; i++)
                 {
                     groupList[i % maxGroupSize].Add(population[i]);
@@ -73,6 +76,8 @@ namespace NNLogic
 
         public void GenerateNextGeneration()
         {
+            // Creates a full-sized population from the organisms that made it through selection.
+            // Status: finished.
             float fitnessSum = 0;
             foreach (NeuralNetwork net in population)
             {
@@ -89,12 +94,14 @@ namespace NNLogic
         public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
+            // Status: just a placeholder, not working at the moment.
             return (List<NeuralNetwork>)nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count)));
         }
 
         private List<NeuralNetwork> _pickNets(float fitnessSum)
         {
             // Returns a set number of organisms that are used to reproduce a single organism
+            // Status: finished.
             List<NeuralNetwork> recombinationList = new List<NeuralNetwork>();
             for (int i = 0; i < reproductionOrganismCount; i++)
             {
@@ -115,7 +122,29 @@ namespace NNLogic
 
         private NeuralNetwork _crossover(List<NeuralNetwork> netsToCombine)
         {
-            return netsToCombine[0];
+            // Takes a set number of networks and randomly combines them into one.
+            // Status: just a (working) prototype, could become much more complex.
+            int numberOfNets = netsToCombine.Count();
+            Random random = new Random();
+            float[][] newWeights = netsToCombine[0].weights.Select(s => s.ToArray()).ToArray();
+            newWeights[0][0] = 1.01f;
+            for (int i = 0; i < netsToCombine[0].weights.Length; i++)
+            {
+                for (int j = 0; j < netsToCombine[0].weights[i].Length; j++)
+                {
+                    newWeights[i][j] = netsToCombine[random.Next(0, numberOfNets)].weights[i][j];
+                }
+            }
+            return new NeuralNetwork(netsToCombine[0].hiddenLayerCount, netsToCombine[0].inputNodeCount, netsToCombine[0].hiddenNodeCount, netsToCombine[0].outputNodeCount, newWeights);
+        }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (NeuralNetwork net in population)
+            {
+                sb.Append(net.ToString());
+            }
+            return sb.ToString();
         }
     }
 }
