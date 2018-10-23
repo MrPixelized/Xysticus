@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Chess;
 
 namespace NNLogic
@@ -7,10 +8,10 @@ namespace NNLogic
     {
         public float[][] weights;
         public float fitness;
-        readonly int hiddenLayerCount;
-        readonly int inputNodeCount;
-        readonly int hiddenNodeCount;
-        readonly int outputNodeCount;
+        public readonly int hiddenLayerCount;
+        public readonly int inputNodeCount;
+        public readonly int hiddenNodeCount;
+        public readonly int outputNodeCount;
 
         public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float[][] weights) {
             this.hiddenLayerCount = hiddenLayerCount;
@@ -56,6 +57,26 @@ namespace NNLogic
         private float _activation(float activation)
         {
             return Math.Max(activation, 0);
+        }
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append('{');
+            for (int i = 0; i < hiddenLayerCount + 1; i++)
+            {
+                sb.Append('{');
+                for (int j = 0; j < weights[i].Length; j++)
+                {
+                    sb.Append(weights[i][j].ToString());
+                    if (!(j == weights[i].Length - 1))
+                    {
+                        sb.Append(' ');
+                    }
+                }
+                sb.Append('}');
+            }
+            sb.Append('}');
+            return sb.ToString();
         }
     }
 }
