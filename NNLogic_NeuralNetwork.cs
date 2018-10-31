@@ -44,7 +44,7 @@ namespace NNLogic
                 for (int j = 0; j < previousLayerNodeCount; j++)
                 {
                     // j represents the index of the neuron of which we are currently using the activation.
-                    // The index of connection from j to i is: i * (number of nodes in the previous layer) + j
+                    // The index of connection from j to i is: i * (number of nodes in the previous layer + 1) + j
                     nextActivations[i] += weights[layer][i * (previousLayerNodeCount + 1) + j] * activations[j];
                 }
                 // Add the bias
@@ -77,6 +77,13 @@ namespace NNLogic
             }
             sb.Append('}');
             return sb.ToString();
+        }
+        public static float[] PositionToNetInput(Position position)
+        {
+            // Turns a Chess.Position into input for a neural network.
+            // Status: just a placeholder, not working at the moment.
+            float[] activations = new float[] { 2.0f, -1.0f };
+            return activations;
         }
     }
 }
