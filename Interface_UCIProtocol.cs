@@ -5,17 +5,18 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using static Interface.Constants;
+using NNLogic;
 
 namespace Interface
 {
     public class UCIProtocol
     {
-        public static Engine engine;
+        public static NeuralNetwork evaluationFunction;
         public static Position currentPosition;
 
         #region Helper functions
 
-        private static String MoveToUCINotation(Move move)
+        private static string MoveToUCINotation(Move move)
         {
             StringBuilder moveStringBuilder = new StringBuilder();
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(move.fromX));
@@ -123,8 +124,7 @@ namespace Interface
                     depth = int.Parse(inputStringArray[i + 1]);
                 }
             }
-            List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
-            Move bestMove = engine.FindBestMove(currentPosition, nextPositionMoveTupleList, depth, alpha: -2.0f, beta: 2.0f).Item1;
+            Move bestMove = Engine.FindBestMove(ref evaluationFunction, currentPosition, depth).Item1;
             String moveString = MoveToUCINotation(bestMove);
             Console.WriteLine("bestmove " + moveString);
             /*
