@@ -1,27 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NNLogic;
 using static Chess.Constants;
 
 namespace Chess
 {
-    public class Engine
+    public static class Engine
     {
-        //private Thread findBestMoveThread;
-        readonly Random evaluationFunction;
-
-        public Engine()
-        {
-            evaluationFunction = new Random();
-            //findBestMoveThread = new Thread(FindBestMove);
-        }
-
-        public void NewGame()
-        {
-            //Clear all data saved about the game
-        }
-
-        public (Move, float) FindBestMove(Position currentPosition, List<(Position, Move)> positionMoveTupleList, int depth, float alpha, float beta)
+        public static (Move, float) FindBestMove(ref NeuralNetwork evaluationFunction, Position currentPosition, List<(Position, Move)> positionMoveTupleList, int depth, float alpha, float beta)
         {
             List<(Move, float)> moveEvaluationTupleList = new List<(Move, float)>();
             List<(Position, Move)> nextPositionMoveTupleList;
@@ -50,7 +37,7 @@ namespace Chess
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         //After the most recent legal move, there are no pseudo-legal moves and the game has ended.
-                        moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        moveEvaluationTupleList.Add((move, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(position))[0]));
                         lastMoveWasLegal = true;
                         //Interface.ConsoleGraphics.DrawPosition(position);
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
@@ -61,12 +48,12 @@ namespace Chess
                         lastMoveWasLegal = true;
                         if (depth == 0)
                         {
-                            moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                            moveEvaluationTupleList.Add((move, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(position))[0]));
                             //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         else
                         {
-                            moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            moveEvaluationTupleList.Add((move, FindBestMove(ref evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
                             //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
@@ -83,7 +70,7 @@ namespace Chess
                 {
                     //This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
                     //In this case, it's safe to return a random move and the evaluation for the final position.
-                    return (positionMoveTupleList.Last().Item2, (float)evaluationFunction.NextDouble());
+                    return (positionMoveTupleList.Last().Item2, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(currentPosition))[0]);
                 }
                 moveEvaluationTupleList.Sort((x, y) => y.Item2.CompareTo(x.Item2));
             }
@@ -108,7 +95,7 @@ namespace Chess
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         //After the most recent legal move, there are no pseudo-legal moves and the game has ended. 
-                        moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                        moveEvaluationTupleList.Add((move, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(position))[0]));
                         //Interface.ConsoleGraphics.DrawPosition(position);
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
                     }
@@ -117,12 +104,12 @@ namespace Chess
                     {
                         if (depth == 0)
                         {
-                            moveEvaluationTupleList.Add((move, (float)evaluationFunction.NextDouble()));
+                            moveEvaluationTupleList.Add((move, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(position))[0]));
                             //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         else
                         {
-                            moveEvaluationTupleList.Add((move, FindBestMove(position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            moveEvaluationTupleList.Add((move, FindBestMove(ref evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
                             //Interface.ConsoleGraphics.DrawPosition(position);
                         }
                         //Console.WriteLine(String.Format("{0}The value we're adding to {1}, {2} to {3}, {4} is {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, moveEvaluationTupleList.Last().Item2));
@@ -139,7 +126,7 @@ namespace Chess
                 {
                     //This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
                     //In this case, it's safe to return a random move and the evaluation for the final position.
-                    return (positionMoveTupleList.Last().Item2, (float)evaluationFunction.NextDouble());
+                    return (positionMoveTupleList.Last().Item2, evaluationFunction.CalculateResult(NeuralNetwork.PositionToNetInput(currentPosition))[0]);
                 }
                 moveEvaluationTupleList.Sort((x, y) => x.Item2.CompareTo(y.Item2));
             }
@@ -148,6 +135,11 @@ namespace Chess
                 //Console.WriteLine(String.Format("{0}The move {1},{2} to {3},{4} has an evaluation of {5}", new String('\t', 1 - depth), move.fromX, move.fromY, move.toX, move.toY, evaluation));
             }
             return moveEvaluationTupleList[0];
+        }
+        public static (Move, float) FindBestMove(ref NeuralNetwork evaluationFunction, Position currentPosition, int depth)
+        {
+            List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
+            return FindBestMove(ref evaluationFunction, currentPosition, nextPositionMoveTupleList, depth, -2.0f, 2.0f);
         }
     }
 }
