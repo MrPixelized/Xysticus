@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Chess;
 
 namespace NNLogic
 {
@@ -95,6 +96,20 @@ namespace NNLogic
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
             // Status: just a placeholder, not working at the moment.
+            
+            for (int i = 0; i < nets.Count; i++)
+            {
+                for (int j = i + 1; j < nets.Count; j++)
+                {
+                    // Let nets[i] play against nets[1].
+                    Game game = new Game
+                    {
+                        whitePlayer = nets[i],
+                        blackPlayer = nets[j]
+                    };
+                    game.Play();
+                }
+            }
             return (List<NeuralNetwork>)nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count)));
         }
 
