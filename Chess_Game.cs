@@ -37,35 +37,20 @@ namespace Chess
                         break;
                     }
                     nextPositionMoveTupleList = currentPosition.GeneratePositions();
-                    if (nextPositionMoveTupleList.Last().Item1 == null)
-                    {
-                        // White just played an illegal move (which only happens when there are no legal moves).
-                        if (isCheck)
-                        {
-                            result = -1;
-                            break;
-                        }
-                        else
-                        {
-                            result = 0.5f;
-                            break;
-                        }
-                    }
-                    isCheck = currentPosition.IsCheck();
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         // White just played a move which doesn't give black any pseudo-legal moves.
-                        if (isCheck)
-                        {
-                            result = 1;
-                            break;
-                        }
-                        else
-                        {
-                            result = 0.5f;
-                            break;
-                        }
+                        isCheck = currentPosition.IsCheck();
+                        result = isCheck ? 1 : 0.5f;
+                        break;
                     }
+                    if (nextPositionMoveTupleList.Last().Item1 == null)
+                    {
+                        // White just played an illegal move (which only happens when there are no legal moves).
+                        result = isCheck ? -1 : 0.5f;
+                        break;
+                    }
+                    isCheck = currentPosition.IsCheck();
                 }
                 else
                 {
@@ -78,35 +63,20 @@ namespace Chess
                         break;
                     }
                     nextPositionMoveTupleList = currentPosition.GeneratePositions();
-                    if (nextPositionMoveTupleList.Last().Item1 == null)
-                    {
-                        // Black just played an illegal move (which only happens when there are no legal moves).
-                        if (isCheck)
-                        {
-                            result = 1;
-                            break;
-                        }
-                        else
-                        {
-                            result = 0.5f;
-                            break;
-                        }
-                    }
-                    isCheck = currentPosition.IsCheck();
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         // Black just played a move which doesn't give white any pseudo-legal moves.
-                        if (isCheck)
-                        {
-                            result = -1;
-                            break;
-                        }
-                        else
-                        {
-                            result = 0.5f;
-                            break;
-                        }
+                        isCheck = currentPosition.IsCheck();
+                        result = isCheck ? -1 : 0.5f;
+                        break;
                     }
+                    if (nextPositionMoveTupleList.Last().Item1 == null)
+                    {
+                        // Black just played an illegal move (which only happens when there are no legal moves).
+                        result = isCheck ? 1 : 0.5f;
+                        break;
+                    }
+                    isCheck = currentPosition.IsCheck();
                 }
                 moveHistory.Add(UCIProtocol.MoveToUCINotation(moveEvaluationTuple.Item1) + " ");
             }
