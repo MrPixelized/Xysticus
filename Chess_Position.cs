@@ -351,7 +351,7 @@ namespace Chess
             return false;
         }
 
-        public bool IsInCheck()
+        public bool IsCheck()
         {
             if (inCheck != null) return (bool)inCheck;
             Position positionWithOppositeSideToMove = new Position()
@@ -359,7 +359,6 @@ namespace Chess
                 toMove = -1 * this.toMove,
                 board = this.board
             };
-            positionWithOppositeSideToMove.toMove *= -1;
             if (positionWithOppositeSideToMove.GeneratePositions().Last().Item1 == null) return true;
             return false;
         }
