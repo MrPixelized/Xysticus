@@ -33,7 +33,7 @@ namespace Chess
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
-                        result = 0.5f;
+                        result = DRAW;
                         break;
                     }
                     nextPositionMoveTupleList = currentPosition.GeneratePositions();
@@ -41,13 +41,13 @@ namespace Chess
                     {
                         // White just played a move which doesn't give black any pseudo-legal moves.
                         isCheck = currentPosition.IsCheck();
-                        result = isCheck ? 1 : 0.5f;
+                        result = isCheck ? WHITE_WIN : DRAW;
                         break;
                     }
                     if (nextPositionMoveTupleList.Last().Item1 == null)
                     {
                         // White just played an illegal move (which only happens when there are no legal moves).
-                        result = isCheck ? -1 : 0.5f;
+                        result = isCheck ? BLACK_WIN : DRAW;
                         break;
                     }
                     isCheck = currentPosition.IsCheck();
@@ -55,11 +55,11 @@ namespace Chess
                 else
                 {
                     // Make the black player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(ref whitePlayer, currentPosition, nextPositionMoveTupleList, 2, -2.0f, 2.0f);
+                    moveEvaluationTuple = Engine.FindBestMove(ref blackPlayer, currentPosition, nextPositionMoveTupleList, 2, -2.0f, 2.0f);
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
-                        result = 0.5f;
+                        result = DRAW;
                         break;
                     }
                     nextPositionMoveTupleList = currentPosition.GeneratePositions();
@@ -67,13 +67,13 @@ namespace Chess
                     {
                         // Black just played a move which doesn't give white any pseudo-legal moves.
                         isCheck = currentPosition.IsCheck();
-                        result = isCheck ? -1 : 0.5f;
+                        result = isCheck ? BLACK_WIN : DRAW;
                         break;
                     }
                     if (nextPositionMoveTupleList.Last().Item1 == null)
                     {
                         // Black just played an illegal move (which only happens when there are no legal moves).
-                        result = isCheck ? 1 : 0.5f;
+                        result = isCheck ? WHITE_WIN : DRAW;
                         break;
                     }
                     isCheck = currentPosition.IsCheck();
