@@ -42,6 +42,10 @@ namespace Chess
         public const int BLACK_QUEEN = -5;
         public const int BLACK_KING = -6;
 
+        public const float WHITE_WIN = 1f;
+        public const float BLACK_WIN = 0f;
+        public const float DRAW = 0.5f;
+
         public static readonly int[,] STANDARD_POSITION = new int[8, 8] {
             {-4,-1,0,0,0,0,1,4},
             {-2,-1,0,0,0,0,1,2},
