@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Linq;
 using Chess;
 
 namespace NNLogic
@@ -8,6 +9,10 @@ namespace NNLogic
     {
         public float[][] weights;
         public float fitness;
+        public float score;
+        public int games;
+        public float totalScore;
+        public int totalGames;
         public readonly int hiddenLayerCount;
         public readonly int inputNodeCount;
         public readonly int hiddenNodeCount;
@@ -78,12 +83,13 @@ namespace NNLogic
             sb.Append('}');
             return sb.ToString();
         }
-        public static float[] PositionToNetInput(Position position)
+        public float[] EvaluatePosition(Position position)
         {
             // Turns a Chess.Position into input for a neural network.
             // Status: just a placeholder, not working at the moment.
-            float[] activations = new float[] { 2.0f, -1.0f };
-            return activations;
+            Random random = new Random();
+            float[] activations = new float[] { (float)random.NextDouble(), (float)random.NextDouble() };
+            return CalculateResult(activations);
         }
     }
 }
