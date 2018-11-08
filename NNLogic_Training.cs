@@ -101,16 +101,42 @@ namespace NNLogic
             {
                 for (int j = i + 1; j < nets.Count; j++)
                 {
-                    // Let nets[i] play against nets[1].
-                    Game game = new Game
+                    // Let nets[i] play against nets[j].
+                    Game game;
+                    if (i % 2 == j % 2)
                     {
-                        whitePlayer = nets[i],
-                        blackPlayer = nets[j]
-                    };
-                    game.Play();
+                        game = new Game
+                        {
+                            whitePlayer = nets[i],
+                            blackPlayer = nets[j]
+                        };
+                        game.Play();
+                        nets[i].score += (float)game.result;
+                        nets[j].score += 1.0f - (float)game.result;
+                    }
+                    else
+                    {
+                        game = new Game
+                        {
+                            whitePlayer = nets[j],
+                            blackPlayer = nets[i]
+                        };
+                        game.Play();
+                        nets[j].score += (float)game.result;
+                        nets[i].score += 1.0f - (float)(game.result);
+                    }
+                    nets[i].games++; nets[j].games++;
+                    Console.WriteLine(game.result);
+                    Console.WriteLine("nets[i] now has a score of {0}, nets[j] {1}", nets[i].score, nets[j].score);
                 }
             }
-            return (List<NeuralNetwork>)nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count)));
+            foreach (NeuralNetwork net in nets)
+            {
+                net.totalScore += net.score;
+                net.totalGames += net.games;
+            }
+            nets.Sort((x, y) => y.score.CompareTo(x.score));
+            return nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count))).ToList();
         }
 
         private List<NeuralNetwork> _pickNets(float fitnessSum)
