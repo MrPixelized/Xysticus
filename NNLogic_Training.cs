@@ -33,7 +33,7 @@ namespace NNLogic
             while (true)
             {
                 generation += 1;
-                RemoveNets();
+                SelectionTournament();
                 /* Rate the fitnesses of the leftover networks
                 Recombine the networks into new ones based on their fitness
                 Mutatie yadadaya
@@ -44,16 +44,16 @@ namespace NNLogic
             }
         }
 
-        public void RemoveNets()
+        public void SelectionTournament()
         {
             // The selection process all networks have to go through to determine if they can reproduce.
             // Status: finished, but has unfinished dependencies.
             List<List<NeuralNetwork>> groupList;
             while (population.Count > populationSizeAfterTrimming)
             {
-                // Step 1: Divide the population into groups of ~equal size
-                groupList = new List<List<NeuralNetwork>>();
+                // Divide the population into groups of ~equal size
                 // Initialize groupList
+                groupList = new List<List<NeuralNetwork>>();
                 int groupCount = (int)Math.Ceiling((double)population.Count / maxGroupSize);
                 // Add the right number of NeuralNetwork groups to the group list.
                 for (int i = 0; i < groupCount; i++)
@@ -78,7 +78,7 @@ namespace NNLogic
         public void GenerateNextGeneration()
         {
             // Creates a full-sized population from the organisms that made it through selection.
-            // Status: finished.
+            // Status: finished, but has unfinished dependencies
             float fitnessSum = 0;
             foreach (NeuralNetwork net in population)
             {
@@ -95,7 +95,7 @@ namespace NNLogic
         public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
-            // Status: just a placeholder, not working at the moment.
+            // Status: finished
             
             for (int i = 0; i < nets.Count; i++)
             {
