@@ -24,7 +24,7 @@ namespace Chess
         {
             (Move, float) moveEvaluationTuple;
             List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
-            while (true)
+            while (result == null)
             {
                 if (currentPosition.toMove == WHITE)
                 {
@@ -34,23 +34,23 @@ namespace Chess
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
                         result = DRAW;
-                        break;
                     }
-                    nextPositionMoveTupleList = currentPosition.GeneratePositions();
-                    if (nextPositionMoveTupleList.Count == 0)
+                    else
                     {
-                        // White just played a move which doesn't give black any pseudo-legal moves.
+                        nextPositionMoveTupleList = currentPosition.GeneratePositions();
+                        if (nextPositionMoveTupleList.Count == 0)
+                        {
+                            // White just played a move which doesn't give black any pseudo-legal moves.
+                            isCheck = currentPosition.IsCheck();
+                            result = isCheck ? WHITE_WIN : DRAW;
+                        }
+                        else if (nextPositionMoveTupleList.Last().Item1 == null)
+                        {
+                            // White just played an illegal move (which only happens when there are no legal moves).
+                            result = isCheck ? BLACK_WIN : DRAW;
+                        }
                         isCheck = currentPosition.IsCheck();
-                        result = isCheck ? WHITE_WIN : DRAW;
-                        break;
                     }
-                    if (nextPositionMoveTupleList.Last().Item1 == null)
-                    {
-                        // White just played an illegal move (which only happens when there are no legal moves).
-                        result = isCheck ? BLACK_WIN : DRAW;
-                        break;
-                    }
-                    isCheck = currentPosition.IsCheck();
                 }
                 else
                 {
@@ -60,23 +60,23 @@ namespace Chess
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
                         result = DRAW;
-                        break;
                     }
-                    nextPositionMoveTupleList = currentPosition.GeneratePositions();
-                    if (nextPositionMoveTupleList.Count == 0)
+                    else
                     {
-                        // Black just played a move which doesn't give white any pseudo-legal moves.
+                        nextPositionMoveTupleList = currentPosition.GeneratePositions();
+                        if (nextPositionMoveTupleList.Count == 0)
+                        {
+                            // Black just played a move which doesn't give white any pseudo-legal moves.
+                            isCheck = currentPosition.IsCheck();
+                            result = isCheck ? BLACK_WIN : DRAW;
+                        }
+                        if (nextPositionMoveTupleList.Last().Item1 == null)
+                        {
+                            // Black just played an illegal move (which only happens when there are no legal moves).
+                            result = isCheck ? WHITE_WIN : DRAW;
+                        }
                         isCheck = currentPosition.IsCheck();
-                        result = isCheck ? BLACK_WIN : DRAW;
-                        break;
                     }
-                    if (nextPositionMoveTupleList.Last().Item1 == null)
-                    {
-                        // Black just played an illegal move (which only happens when there are no legal moves).
-                        result = isCheck ? WHITE_WIN : DRAW;
-                        break;
-                    }
-                    isCheck = currentPosition.IsCheck();
                 }
                 moveHistory.Add(UCIProtocol.MoveToUCINotation(moveEvaluationTuple.Item1) + " ");
             }
