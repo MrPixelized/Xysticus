@@ -86,10 +86,48 @@ namespace NNLogic
         public float[] EvaluatePosition(Position position)
         {
             // Turns a Chess.Position into input for a neural network.
-            // Status: just a placeholder, not working at the moment.
-            Random random = new Random();
-            float[] activations = new float[] { (float)random.NextDouble(), (float)random.NextDouble() };
-            return CalculateResult(activations);
+            // Status: finished.
+            float[] networkInput = new float[12 * 64 + 16 + 4 + 1 + 1]; 
+            /* Distribution of nodes:
+             * 12 * 64 possible piece positions
+             * 16 possible en passant squares
+             * 4 castling rights
+             * 1 side to move
+             * 1 fifty-move rule
+             */
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    int pieceNumberType = position.board[i, j];
+                    if (pieceNumberType != 0)
+                    {
+                        // position.board[i, j] contains a piece
+                        // Since there is a gap between -1 and 1, we may have to add 5 or 6 to the piece number type to obtain the appropriate input index
+                        int inputIndex = pieceNumberType > 0 ? pieceNumberType + 5 : pieceNumberType + 6;
+                        // Set the appropriate input node to 1
+                        networkInput[inputIndex * 64 + 8 * i + j] = 1;
+                    }
+                }
+            }
+            if (position.enPassantSquare.Item1 != -1)
+            {
+                // There is an en passant square on the board
+                int inputIndex = position.enPassantSquare.Item1 * 2;
+                if (position.enPassantSquare.Item2 == 5) inputIndex += 1;
+                // Set the appropriate input node to 1
+                networkInput[12 * 64 + inputIndex] = 1;
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                // Set the castling rights
+                networkInput[12 * 64 + 16 + i] = position.castlingRights[i] ? 1 : 0;
+            }
+            // Set the side to move
+            networkInput[12 * 64 + 16 + 4] = position.toMove;
+            // Set the fifty move proximity
+            networkInput[12 * 64 + 16 + 4 + 1] = position.fiftyMoveProximity;
+            return CalculateResult(networkInput);
         }
     }
 }
