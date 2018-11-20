@@ -8,23 +8,34 @@ namespace NNLogic
 {
     public class Training
     {
-        public List<NeuralNetwork> population;
-        int generation;
         readonly int reproductionOrganismCount;
         readonly int maxGroupSize;
         readonly float selectionFactor;
         readonly int populationSizeBeforeTrimming;
         readonly int populationSizeAfterTrimming;
+        readonly int hiddenLayerCount;
+        readonly int inputNodeCount;
+        readonly int hiddenNodeCount;
+        readonly int outputNodeCount;
+        public List<NeuralNetwork> population;
+        int generation;
         Random random;
 
-        public Training(List<NeuralNetwork> population, int reproductionOrganismCount, int maxGroupSize, float selectionFactor, int populationSizeBeforeTrimming, int populationSizeAfterTrimming)
+        public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor, 
+            int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
+            int inputNodeCount, int hiddenNodeCount, int outputNodeCount, 
+            List<NeuralNetwork> population = null)
         {
-            this.population = population;
             this.reproductionOrganismCount = reproductionOrganismCount;
             this.maxGroupSize = maxGroupSize;
             this.selectionFactor = selectionFactor;
             this.populationSizeAfterTrimming = populationSizeAfterTrimming;
             this.populationSizeBeforeTrimming = populationSizeBeforeTrimming;
+            this.hiddenLayerCount = hiddenLayerCount;
+            this.inputNodeCount = inputNodeCount;
+            this.hiddenNodeCount = hiddenNodeCount;
+            this.outputNodeCount = outputNodeCount;
+            this.population = population ?? InitializePopulation();
             random = new Random();
         }
 
@@ -42,6 +53,16 @@ namespace NNLogic
                 */
                 GenerateNextGeneration();
             }
+        }
+
+        public List<NeuralNetwork> InitializePopulation()
+        {
+            List<NeuralNetwork> initialPopulation = new List<NeuralNetwork>();
+            for (int i = 0; i < populationSizeBeforeTrimming; i++)
+            {
+                initialPopulation.Add(new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount));
+            }
+            return initialPopulation;
         }
 
         public void SelectionTournament()
@@ -132,6 +153,7 @@ namespace NNLogic
             }
             foreach (NeuralNetwork net in nets)
             {
+                // Update the score of the individuals in the tournament with the scores achieved this round.
                 net.totalScore += net.score;
                 net.totalGames += net.games;
             }
@@ -176,7 +198,7 @@ namespace NNLogic
                     newWeights[i][j] = netsToCombine[random.Next(0, numberOfNets)].weights[i][j];
                 }
             }
-            return new NeuralNetwork(netsToCombine[0].hiddenLayerCount, netsToCombine[0].inputNodeCount, netsToCombine[0].hiddenNodeCount, netsToCombine[0].outputNodeCount, newWeights);
+            return new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount, newWeights);
         }
         public override string ToString()
         {
