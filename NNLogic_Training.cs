@@ -84,7 +84,7 @@ namespace NNLogic
                 // Add the networks to the groups, looping at maxGroupSize.
                 for (int i = 0; i < population.Count; i++)
                 {
-                    groupList[i % maxGroupSize].Add(population[i]);
+                    groupList[i % groupCount].Add(population[i]);
                 }
                 // Select networks to continue to the next round
                 List<NeuralNetwork> nextPopulation = new List<NeuralNetwork>();
