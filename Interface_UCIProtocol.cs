@@ -14,9 +14,7 @@ namespace Interface
         public static NeuralNetwork evaluationFunction;
         public static Position currentPosition;
 
-        #region Helper functions
-
-        private static string MoveToUCINotation(Move move)
+        public static string MoveToUCINotation(Move move)
         {
             StringBuilder moveStringBuilder = new StringBuilder();
             moveStringBuilder.Append(INVERSED_COORDINATE_TRANSFORMATION(move.fromX));
@@ -29,8 +27,6 @@ namespace Interface
             }
             return moveStringBuilder.ToString();
         }
-
-        #endregion
 
         #region Input functions
 
@@ -115,7 +111,7 @@ namespace Interface
         }
         private static void InputGo(string[] inputStringArray)
         {
-            int depth = 3;
+            int depth = 1;
 
             for(int i = 0; i < inputStringArray.Length; i++)
             {
@@ -124,8 +120,10 @@ namespace Interface
                     depth = int.Parse(inputStringArray[i + 1]);
                 }
             }
-            Move bestMove = Engine.FindBestMove(ref evaluationFunction, currentPosition, depth).Item1;
-            String moveString = MoveToUCINotation(bestMove);
+            (Move, float) moveEvaluationTuple = Engine.FindBestMove(ref evaluationFunction, currentPosition, depth);
+            String moveString = MoveToUCINotation(moveEvaluationTuple.Item1);
+            Console.WriteLine("info depth " + depth + " score cp " + 
+                (int)(moveEvaluationTuple.Item2 * 100 * currentPosition.toMove) + " pv " + moveString);
             Console.WriteLine("bestmove " + moveString);
             /*
             FindBestMoveThread = new Thread(() => game.currentPosition.FindBestMove(3, -2, 2));
