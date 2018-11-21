@@ -41,7 +41,7 @@ namespace NNLogic
             weights[0] = new float[(inputNodeCount + 1) * hiddenNodeCount];
             for (int i = 0; i < (inputNodeCount + 1) * hiddenNodeCount; i++)
             {
-                weights[0][i] = _generateweight(ref random);
+                weights[0][i] = _generateweight(ref random, inputNodeCount);
 
             }
             for (int i = 0; i < hiddenLayerCount - 1; i++)
@@ -49,25 +49,22 @@ namespace NNLogic
                 weights[i + 1] = new float[(hiddenNodeCount + 1) * hiddenNodeCount];
                 for (int j = 0; j < (hiddenNodeCount + 1) * hiddenNodeCount; j++)
                 {
-                    weights[i + 1][j] = _generateweight(ref random);
+                    weights[i + 1][j] = _generateweight(ref random, hiddenNodeCount);
                 }
             }
             weights[hiddenLayerCount] = new float[(hiddenNodeCount + 1) * outputNodeCount];
             for (int i = 0; i < (hiddenNodeCount + 1) * outputNodeCount; i++)
             {
-                weights[hiddenLayerCount][i] = _generateweight(ref random);
+                weights[hiddenLayerCount][i] = _generateweight(ref random, hiddenNodeCount);
             }
         }
-        private float _generateweight(ref Random random)
+        private float _generateweight(ref Random random, int layerInputNodes)
         {
-            float mean = 0;
-            float stdDev = 1;
             double u1 = 1.0 - random.NextDouble();
             double u2 = 1.0 - random.NextDouble();
-            double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+            double randNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
                          Math.Sin(2.0 * Math.PI * u2);
-            double randNormal =
-                         mean + stdDev * randStdNormal;
+            double weight = randNormal * Math.Sqrt(2f / layerInputNodes);
             return (float)randNormal;
         }
         public float EvaluatePosition(Position position)
