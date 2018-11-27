@@ -17,13 +17,16 @@ namespace NNLogic
         readonly int inputNodeCount;
         readonly int hiddenNodeCount;
         readonly int outputNodeCount;
+        readonly float mutationRate;
+        readonly int testFrequency;
         public List<NeuralNetwork> population;
         int generation;
+        NeuralNetwork previousBest;
         Random random;
 
         public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor, 
             int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
-            int inputNodeCount, int hiddenNodeCount, int outputNodeCount, 
+            int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float mutationRate, int testFrequency,
             List<NeuralNetwork> population = null)
         {
             this.reproductionOrganismCount = reproductionOrganismCount;
@@ -35,24 +38,48 @@ namespace NNLogic
             this.inputNodeCount = inputNodeCount;
             this.hiddenNodeCount = hiddenNodeCount;
             this.outputNodeCount = outputNodeCount;
+            this.mutationRate = mutationRate;
+            this.testFrequency = testFrequency;
             this.population = population ?? InitializePopulation();
             random = new Random();
         }
 
         public void Train()
         {
+            previousBest = population[0];
             while (true)
             {
                 generation += 1;
                 SelectionTournament();
-                /* Rate the fitnesses of the leftover networks
-                Recombine the networks into new ones based on their fitness
-                Mutatie yadadaya
-                Recombination yadadayadayaddaadaya
-                Put these new networks and(some of) the ones from the previous population of size F generated at 1. in a new population, repeat from 1.
-                */
+                if (generation % testFrequency == 0) {
+                    CompareBestToPrevious();
+                }
                 GenerateNextGeneration();
+                MutatePopulation();
             }
+        }
+        
+        public CompareBestToPrevious() {
+            int score = 0;
+            Game game;
+            game = new Game
+            {
+                whitePlayer = population[population.Length-1],
+                blackPlayer = previousBest
+            };
+            game.Play();
+            score += game.result;
+            game = new Game
+            {
+                whitePlayer = previousBest,
+                blackPlayer = population[population.Length-1]
+            };
+            game.Play();
+            score -= game.result;
+            string logLine = "Score: " + (string) score + "; Generation: " + (string) generation;
+            Console.WriteLine(logLine);
+            System.IO.File.AppendAllText("scores.txt", logLine);
+            previousBest = population[population.Length-1];
         }
 
         public List<NeuralNetwork> InitializePopulation()
@@ -63,6 +90,16 @@ namespace NNLogic
                 initialPopulation.Add(new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount));
             }
             return initialPopulation;
+        }
+        
+        private void MutatePopulation() {
+            foreach (NeuralNetwork net in population) {
+                foreach (float[] weightArray in net.weights) {
+                    for (int i = 0; i < weightArray.Length; i++) {
+                        weightArray[i] += (float) (random.nextDouble()*2 - 1)*mutationRate
+                    }
+                }
+            }
         }
 
         public void SelectionTournament()
@@ -94,6 +131,7 @@ namespace NNLogic
                 }
                 population = nextPopulation;
             }
+            population.Sort((x, y) => y.score.CompareTo(x.totalScore));
         }
 
         public void GenerateNextGeneration()
