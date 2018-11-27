@@ -51,6 +51,7 @@ namespace NNLogic
             {
                 generation += 1;
                 SelectionTournament();
+                BestToFile();
                 if (generation % testFrequency == 0) {
                     CompareBestToPrevious();
                 }
@@ -59,12 +60,16 @@ namespace NNLogic
             }
         }
         
+        private BestToFile() {
+            System.IO.File.AppendAllText("nethistory.txt", population[0].toString());
+        }
+        
         public CompareBestToPrevious() {
             int score = 0;
             Game game;
             game = new Game
             {
-                whitePlayer = population[population.Length-1],
+                whitePlayer = population[0],
                 blackPlayer = previousBest
             };
             game.Play();
@@ -72,14 +77,14 @@ namespace NNLogic
             game = new Game
             {
                 whitePlayer = previousBest,
-                blackPlayer = population[population.Length-1]
+                blackPlayer = population[0]
             };
             game.Play();
             score -= game.result;
             string logLine = "Score: " + (string) score + "; Generation: " + (string) generation;
             Console.WriteLine(logLine);
             System.IO.File.AppendAllText("scores.txt", logLine);
-            previousBest = population[population.Length-1];
+            previousBest = population[0];
         }
 
         public List<NeuralNetwork> InitializePopulation()
