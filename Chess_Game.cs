@@ -14,6 +14,7 @@ namespace Chess
         public NeuralNetwork blackPlayer;
         public bool isCheck;
         public float? result;
+        public int engineDepth;
 
         public Game(Position startingPosition = null)
         {
@@ -29,7 +30,7 @@ namespace Chess
                 if (currentPosition.toMove == WHITE)
                 {
                     // Make the white player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(ref whitePlayer, currentPosition, nextPositionMoveTupleList, 2, -2.0f, 2.0f);
+                    moveEvaluationTuple = Engine.FindBestMove(ref whitePlayer, currentPosition, nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
@@ -55,7 +56,7 @@ namespace Chess
                 else
                 {
                     // Make the black player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(ref blackPlayer, currentPosition, nextPositionMoveTupleList, 2, -2.0f, 2.0f);
+                    moveEvaluationTuple = Engine.FindBestMove(ref blackPlayer, currentPosition, nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
