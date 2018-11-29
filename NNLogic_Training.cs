@@ -24,7 +24,7 @@ namespace NNLogic
         NeuralNetwork previousBest;
         Random random;
 
-        public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor, 
+        public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor,
             int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
             int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float mutationRate, int testFrequency,
             List<NeuralNetwork> population = null)
@@ -52,20 +52,23 @@ namespace NNLogic
                 generation += 1;
                 SelectionTournament();
                 BestToFile();
-                if (generation % testFrequency == 0) {
+                if (generation % testFrequency == 0)
+                {
                     CompareBestToPrevious();
                 }
                 GenerateNextGeneration();
                 MutatePopulation();
             }
         }
-        
-        private BestToFile() {
-            System.IO.File.AppendAllText("nethistory.txt", population[0].toString());
+
+        private void BestToFile()
+        {
+            System.IO.File.AppendAllText("nethistory.txt", population[0].ToString());
         }
-        
-        public CompareBestToPrevious() {
-            int score = 0;
+
+        public void CompareBestToPrevious()
+        {
+            float score = 0;
             Game game;
             game = new Game
             {
@@ -73,15 +76,15 @@ namespace NNLogic
                 blackPlayer = previousBest
             };
             game.Play();
-            score += game.result;
+            score += (float)game.result;
             game = new Game
             {
                 whitePlayer = previousBest,
                 blackPlayer = population[0]
             };
             game.Play();
-            score -= game.result;
-            string logLine = "Score: " + (string) score + "; Generation: " + (string) generation;
+            score -= (float)game.result;
+            string logLine = "Score: " + score.ToString() + "; Generation: " + generation.ToString();
             Console.WriteLine(logLine);
             System.IO.File.AppendAllText("scores.txt", logLine);
             previousBest = population[0];
@@ -96,12 +99,16 @@ namespace NNLogic
             }
             return initialPopulation;
         }
-        
-        private void MutatePopulation() {
-            foreach (NeuralNetwork net in population) {
-                foreach (float[] weightArray in net.weights) {
-                    for (int i = 0; i < weightArray.Length; i++) {
-                        weightArray[i] += (float) (random.nextDouble()*2 - 1)*mutationRate
+
+        private void MutatePopulation()
+        {
+            foreach (NeuralNetwork net in population)
+            {
+                foreach (float[] weightArray in net.weights)
+                {
+                    for (int i = 0; i < weightArray.Length; i++)
+                    {
+                        weightArray[i] += (float)(random.NextDouble() * 2 - 1) * mutationRate;
                     }
                 }
             }
@@ -160,7 +167,7 @@ namespace NNLogic
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
             // Status: finished
-            
+
             for (int i = 0; i < nets.Count; i++)
             {
                 for (int j = i + 1; j < nets.Count; j++)
