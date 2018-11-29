@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Chess;
+using Interface;
 
 namespace NNLogic
 {
@@ -19,6 +20,7 @@ namespace NNLogic
         readonly int outputNodeCount;
         readonly float mutationRate;
         readonly int testFrequency;
+        readonly int engineDepth;
         public List<NeuralNetwork> population;
         int generation;
         NeuralNetwork previousBest;
@@ -27,7 +29,7 @@ namespace NNLogic
         public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor,
             int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
             int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float mutationRate, int testFrequency,
-            List<NeuralNetwork> population = null)
+            int engineDepth, List<NeuralNetwork> population = null)
         {
             this.reproductionOrganismCount = reproductionOrganismCount;
             this.maxGroupSize = maxGroupSize;
@@ -40,54 +42,9 @@ namespace NNLogic
             this.outputNodeCount = outputNodeCount;
             this.mutationRate = mutationRate;
             this.testFrequency = testFrequency;
+            this.engineDepth = engineDepth;
             this.population = population ?? InitializePopulation();
             random = new Random();
-        }
-
-        public void Train()
-        {
-            previousBest = population[0];
-            while (true)
-            {
-                generation += 1;
-                SelectionTournament();
-                BestToFile();
-                if (generation % testFrequency == 0)
-                {
-                    CompareBestToPrevious();
-                }
-                GenerateNextGeneration();
-                MutatePopulation();
-            }
-        }
-
-        private void BestToFile()
-        {
-            System.IO.File.AppendAllText("nethistory.txt", population[0].ToString());
-        }
-
-        public void CompareBestToPrevious()
-        {
-            float score = 0;
-            Game game;
-            game = new Game
-            {
-                whitePlayer = population[0],
-                blackPlayer = previousBest
-            };
-            game.Play();
-            score += (float)game.result;
-            game = new Game
-            {
-                whitePlayer = previousBest,
-                blackPlayer = population[0]
-            };
-            game.Play();
-            score -= (float)game.result;
-            string logLine = "Score: " + score.ToString() + "; Generation: " + generation.ToString();
-            Console.WriteLine(logLine);
-            System.IO.File.AppendAllText("scores.txt", logLine);
-            previousBest = population[0];
         }
 
         public List<NeuralNetwork> InitializePopulation()
@@ -100,24 +57,28 @@ namespace NNLogic
             return initialPopulation;
         }
 
-        private void MutatePopulation()
+        public void Train()
         {
-            foreach (NeuralNetwork net in population)
+            previousBest = population[0];
+            while (true)
             {
-                foreach (float[] weightArray in net.weights)
+                generation += 1;
+                SelectionTournament();
+                SetFitnesses();
+                SortNets();
+                BestToFile();
+                if (generation % testFrequency == 0)
                 {
-                    for (int i = 0; i < weightArray.Length; i++)
-                    {
-                        weightArray[i] += (float)(random.NextDouble() * 2 - 1) * mutationRate;
-                    }
+                    CompareBestToPrevious();
                 }
+                GenerateNextGeneration();
+                MutatePopulation();
             }
         }
 
         public void SelectionTournament()
         {
-            // The selection process all networks have to go through to determine if they can reproduce.
-            // Status: finished, but has unfinished dependencies.
+            // The selection process all networks have to go through to determine if they can reproduce
             List<List<NeuralNetwork>> groupList;
             while (population.Count > populationSizeAfterTrimming)
             {
@@ -125,12 +86,12 @@ namespace NNLogic
                 // Initialize groupList
                 groupList = new List<List<NeuralNetwork>>();
                 int groupCount = (int)Math.Ceiling((double)population.Count / maxGroupSize);
-                // Add the right number of NeuralNetwork groups to the group list.
+                // Add the right number of NeuralNetwork groups to the group list
                 for (int i = 0; i < groupCount; i++)
                 {
                     groupList.Add(new List<NeuralNetwork>());
                 }
-                // Add the networks to the groups, looping at maxGroupSize.
+                // Add the networks to the groups, looping at groupCount
                 for (int i = 0; i < population.Count; i++)
                 {
                     groupList[i % groupCount].Add(population[i]);
@@ -142,14 +103,68 @@ namespace NNLogic
                     nextPopulation.AddRange(RunRoundRobin(groupList[i]));
                 }
                 population = nextPopulation;
+                foreach (NeuralNetwork net in population)
+                {
+                    net.games = 0;
+                    net.score = 0;
+                }
             }
-            population.Sort((x, y) => y.score.CompareTo(x.totalScore));
+        }
+
+        public void SetFitnesses()
+        {
+            foreach (NeuralNetwork net in population)
+            {
+                net.fitness = net.totalScore / net.totalGames;
+            }
+        }
+
+        public void SortNets()
+        {
+            population.Sort((x, y) => y.fitness.CompareTo(x.fitness));
+            foreach (NeuralNetwork net in population)
+            {
+                net.score = 0;
+                net.totalScore = 0;
+                net.games = 0;
+                net.totalGames = 0;
+            }
+        }
+
+        public void BestToFile()
+        {
+            System.IO.File.AppendAllText("nethistory.txt", population[0].ToString());
+        }
+
+        public void CompareBestToPrevious()
+        {
+            float score = 0;
+            Game game;
+            game = new Game
+            {
+                whitePlayer = population[0],
+                blackPlayer = previousBest,
+                engineDepth = engineDepth
+            };
+            game.Play();
+            score += (float)game.result;
+            game = new Game
+            {
+                whitePlayer = previousBest,
+                blackPlayer = population[0],
+                engineDepth = engineDepth
+            };
+            game.Play();
+            score -= (float)game.result;
+            string logLine = "Score: " + score.ToString() + "; Generation: " + generation.ToString();
+            Console.WriteLine(logLine);
+            System.IO.File.AppendAllText("scores.txt", logLine);
+            previousBest = population[0];
         }
 
         public void GenerateNextGeneration()
         {
-            // Creates a full-sized population from the organisms that made it through selection.
-            // Status: finished, but has unfinished dependencies
+            // Creates a full-sized population from the organisms that made it through selection
             float fitnessSum = 0;
             foreach (NeuralNetwork net in population)
             {
@@ -163,47 +178,62 @@ namespace NNLogic
             }
         }
 
+        public void MutatePopulation()
+        {
+            foreach (NeuralNetwork net in population)
+            {
+                foreach (float[] weightArray in net.weights)
+                {
+                    for (int i = 0; i < weightArray.Length; i++)
+                    {
+                        weightArray[i] += (float)(random.NextDouble() * 2 - 1) * mutationRate;
+                    }
+                }
+            }
+        }
+
         public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
-            // Status: finished
-
+            Console.WriteLine("\nNew round robin:\n");
             for (int i = 0; i < nets.Count; i++)
             {
                 for (int j = i + 1; j < nets.Count; j++)
                 {
-                    // Let nets[i] play against nets[j].
+                    // Let nets[i] play against nets[j]
                     Game game;
                     if (i % 2 == j % 2)
                     {
                         game = new Game
                         {
                             whitePlayer = nets[i],
-                            blackPlayer = nets[j]
+                            blackPlayer = nets[j],
+                            engineDepth = engineDepth
                         };
                         game.Play();
                         nets[i].score += (float)game.result;
                         nets[j].score += 1.0f - (float)game.result;
+                        ConsoleGraphics.WriteResult(nets[i], nets[j], (float)game.result);
                     }
                     else
                     {
                         game = new Game
                         {
                             whitePlayer = nets[j],
-                            blackPlayer = nets[i]
+                            blackPlayer = nets[i],
+                            engineDepth = engineDepth
                         };
                         game.Play();
                         nets[j].score += (float)game.result;
                         nets[i].score += 1.0f - (float)(game.result);
+                        ConsoleGraphics.WriteResult(nets[j], nets[i], (float)game.result);
                     }
                     nets[i].games++; nets[j].games++;
-                    Console.WriteLine(game.result);
-                    Console.WriteLine("nets[i] now has a score of {0}, nets[j] {1}", nets[i].score, nets[j].score);
                 }
             }
             foreach (NeuralNetwork net in nets)
             {
-                // Update the score of the individuals in the tournament with the scores achieved this round.
+                // Update the score of the individuals in the tournament with the scores achieved this round
                 net.totalScore += net.score;
                 net.totalGames += net.games;
             }
@@ -214,7 +244,6 @@ namespace NNLogic
         private List<NeuralNetwork> _pickNets(float fitnessSum)
         {
             // Returns a set number of organisms that are used to reproduce a single organism
-            // Status: finished.
             List<NeuralNetwork> recombinationList = new List<NeuralNetwork>();
             for (int i = 0; i < reproductionOrganismCount; i++)
             {
@@ -235,12 +264,15 @@ namespace NNLogic
 
         private NeuralNetwork _crossover(List<NeuralNetwork> netsToCombine)
         {
-            // Takes a set number of networks and randomly combines them into one.
-            // Status: just a (working) prototype, could become much more complex.
+            // Takes a set number of networks and randomly combines them into one
             int numberOfNets = netsToCombine.Count();
-            Random random = new Random();
-            float[][] newWeights = netsToCombine[0].weights.Select(s => s.ToArray()).ToArray();
-            newWeights[0][0] = 1.01f;
+            float[][] newWeights = new float[hiddenLayerCount + 1][];
+            newWeights[0] = new float[(inputNodeCount + 1) * hiddenNodeCount];
+            for (int i = 0; i < hiddenLayerCount - 1; i++)
+            {
+                newWeights[i + 1] = new float[(hiddenNodeCount + 1) * hiddenNodeCount];
+            }
+            newWeights[newWeights.Length - 1] = new float[(hiddenNodeCount + 1) * outputNodeCount];
             for (int i = 0; i < netsToCombine[0].weights.Length; i++)
             {
                 for (int j = 0; j < netsToCombine[0].weights[i].Length; j++)
@@ -250,6 +282,7 @@ namespace NNLogic
             }
             return new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount, newWeights);
         }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
