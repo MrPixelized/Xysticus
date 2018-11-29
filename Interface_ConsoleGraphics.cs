@@ -1,10 +1,19 @@
 using System;
 using Chess;
+using NNLogic;
 
 namespace Interface
 {
     public class ConsoleGraphics
     {
+        public static void DrawPosition(int[,] board)
+        {
+            Console.WriteLine(ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine());
+        }
+        public static void DrawPosition(Position position)
+        {
+            DrawPosition(position.board);
+        }
         private static string ConstructTopLine()
         {
             string topLine = Constants.BORDER_GRAPHICS("top left corner");
@@ -52,14 +61,13 @@ namespace Interface
             bottomLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("bottom right corner");
             return bottomLine;
         }
-        public static void DrawPosition(int[,] board)
+        public static void WriteResult(NeuralNetwork white, NeuralNetwork black, float result)
         {
-            Console.WriteLine(ConstructTopLine() + ConstructMiddlePart(board) + ConstructBottomLine());
-        }
-        public static void DrawPosition(Position position)
-        {
-            DrawPosition(position.board);
+            Console.WriteLine(string.Format("{0,-18} {1,3} - {2,-3} {3,18}",
+                string.Format("Net {0} ({1})", white.ID, white.score),
+                result, 1 - result,
+                string.Format("Net {0} ({1})", black.ID, black.score)
+            ));
         }
     }
 }
-
