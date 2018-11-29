@@ -7,6 +7,8 @@ namespace NNLogic
 {
     public class NeuralNetwork
     {
+        static int networksCreated;
+        public int ID;
         public float[][] weights;
         public float fitness;
         public float score;
@@ -20,6 +22,8 @@ namespace NNLogic
 
         public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float[][] weights)
         {
+            networksCreated++;
+            ID = networksCreated;
             this.hiddenLayerCount = hiddenLayerCount;
             this.inputNodeCount = inputNodeCount;
             this.hiddenNodeCount = hiddenNodeCount;
@@ -28,6 +32,8 @@ namespace NNLogic
         }
         public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount)
         {
+            networksCreated++;
+            ID = networksCreated;
             this.hiddenLayerCount = hiddenLayerCount;
             this.inputNodeCount = inputNodeCount;
             this.hiddenNodeCount = hiddenNodeCount;
