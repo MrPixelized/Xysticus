@@ -196,11 +196,33 @@ namespace NNLogic
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
             Console.WriteLine("\nNew round robin:\n");
+
+            foreach (Game game in GeneratePairings(nets))
+            {
+                game.Play();
+                game.whitePlayer.score += (float)game.result;
+                game.blackPlayer.score += 1.0f - (float)game.result;
+                ConsoleGraphics.WriteResult(game.whitePlayer, game.blackPlayer, (float)game.result);
+                game.whitePlayer.games++; game.blackPlayer.games++;
+            }
+            
+            foreach (NeuralNetwork net in nets)
+            {
+                // Update the score of the individuals in the tournament with the scores achieved this round
+                net.totalScore += net.score;
+                net.totalGames += net.games;
+            }
+            nets = nets.OrderBy(s => s.score).ThenBy(s => s.totalScore).ToList();
+            nets.Reverse();
+            return nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count))).ToList();
+        }
+
+        public IEnumerable<Game> GeneratePairings(List<NeuralNetwork> nets)
+        {
             for (int i = 0; i < nets.Count; i++)
             {
                 for (int j = i + 1; j < nets.Count; j++)
                 {
-                    // Let nets[i] play against nets[j]
                     Game game;
                     if (i % 2 == j % 2)
                     {
@@ -210,10 +232,6 @@ namespace NNLogic
                             blackPlayer = nets[j],
                             engineDepth = engineDepth
                         };
-                        game.Play();
-                        nets[i].score += (float)game.result;
-                        nets[j].score += 1.0f - (float)game.result;
-                        ConsoleGraphics.WriteResult(nets[i], nets[j], (float)game.result);
                     }
                     else
                     {
@@ -223,22 +241,10 @@ namespace NNLogic
                             blackPlayer = nets[i],
                             engineDepth = engineDepth
                         };
-                        game.Play();
-                        nets[j].score += (float)game.result;
-                        nets[i].score += 1.0f - (float)(game.result);
-                        ConsoleGraphics.WriteResult(nets[j], nets[i], (float)game.result);
                     }
-                    nets[i].games++; nets[j].games++;
+                    yield return game;
                 }
             }
-            foreach (NeuralNetwork net in nets)
-            {
-                // Update the score of the individuals in the tournament with the scores achieved this round
-                net.totalScore += net.score;
-                net.totalGames += net.games;
-            }
-            nets.Sort((x, y) => y.score.CompareTo(x.score));
-            return nets.Take((int)Math.Ceiling(selectionFactor * (nets.Count))).ToList();
         }
 
         private List<NeuralNetwork> _pickNets(float fitnessSum)
