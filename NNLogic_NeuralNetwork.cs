@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.Linq;
+using System.Threading.Tasks;
 using Chess;
 
 namespace NNLogic
@@ -122,7 +123,7 @@ namespace NNLogic
         public float[] CalculateResult(float[] activations)
         {
             float[] currentActivations = activations;
-            for (int i = 1; i < hiddenLayerCount + 1; i++)
+            for (int i = 1; i < hiddenLayerCount + 2; i++)
             {
                 currentActivations = _advance(currentActivations, i);
             }
