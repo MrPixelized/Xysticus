@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Chess;
 using Interface;
 
@@ -197,14 +198,14 @@ namespace NNLogic
             // Return the strongest ceil(selectionFactor * nets.Count) nets
             Console.WriteLine("\nNew round robin:\n");
 
-            foreach (Game game in GeneratePairings(nets))
+            Parallel.ForEach(GeneratePairings(nets), game =>
             {
                 game.Play();
                 game.whitePlayer.score += (float)game.result;
                 game.blackPlayer.score += 1.0f - (float)game.result;
                 ConsoleGraphics.WriteResult(game.whitePlayer, game.blackPlayer, (float)game.result);
                 game.whitePlayer.games++; game.blackPlayer.games++;
-            }
+            });
             
             foreach (NeuralNetwork net in nets)
             {
