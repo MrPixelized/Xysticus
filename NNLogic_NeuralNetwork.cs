@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using System.IO;
 using Chess;
 
 namespace NNLogic
@@ -21,7 +22,8 @@ namespace NNLogic
         public readonly int hiddenNodeCount;
         public readonly int outputNodeCount;
 
-        public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float[][] weights)
+        public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount,
+            float[][] weights = null, string filename = "")
         {
             networksCreated++;
             ID = networksCreated;
@@ -29,19 +31,37 @@ namespace NNLogic
             this.inputNodeCount = inputNodeCount;
             this.hiddenNodeCount = hiddenNodeCount;
             this.outputNodeCount = outputNodeCount;
-            this.weights = weights;
+            if (filename != "")
+            {
+                string contents = File.ReadAllText(filename).Replace("{", "");
+                string[] weightString = contents.Split('}');
+                weightString = weightString.Take(weightString.Length - 2).ToArray();
+                string[][] weightStringArray = new string[weightString.Length][];
+                for (int i = 0; i < weightString.Length; i++)
+                {
+                    weightStringArray[i] = weightString[i].Split(' ');
+                }
+                float[][] netWeights = new float[weightStringArray.Length][];
+                for (int i = 0; i < weightStringArray.Length; i++)
+                {
+                    netWeights[i] = new float[weightStringArray[i].Length];
+                    for (int j = 0; j < weightStringArray[i].Length; j++)
+                    {
+                        netWeights[i][j] = float.Parse(weightStringArray[i][j]);
+                    }
+                }
+            }
+            if (weights == null)
+            {
+                this.weights = new float[hiddenLayerCount + 1][];
+                _initweights();
+            }
+            else
+            {
+                this.weights = weights;
+            }
         }
-        public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount)
-        {
-            networksCreated++;
-            ID = networksCreated;
-            this.hiddenLayerCount = hiddenLayerCount;
-            this.inputNodeCount = inputNodeCount;
-            this.hiddenNodeCount = hiddenNodeCount;
-            this.outputNodeCount = outputNodeCount;
-            weights = new float[hiddenLayerCount + 1][];
-            _initweights();
-        }
+
         private void _initweights()
         {
             Random random = new Random();
@@ -152,6 +172,7 @@ namespace NNLogic
                 // Apply the activation function
                 nextActivations[i] = _activation(nextActivations[i]);
             }
+
             return nextActivations;
         }
         private float _activation(float activation)
