@@ -50,6 +50,7 @@ namespace NNLogic
                         netWeights[i][j] = float.Parse(weightStringArray[i][j]);
                     }
                 }
+                weights = netWeights;
             }
             if (weights == null)
             {
