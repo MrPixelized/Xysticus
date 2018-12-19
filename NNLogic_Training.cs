@@ -30,7 +30,7 @@ namespace NNLogic
         public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor,
             int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
             int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float mutationRate, int testFrequency,
-            int engineDepth, List<NeuralNetwork> population = null)
+            int engineDepth, bool saveLastNets = true, List<NeuralNetwork> population = null)
         {
             this.reproductionOrganismCount = reproductionOrganismCount;
             this.maxGroupSize = maxGroupSize;
@@ -76,6 +76,11 @@ namespace NNLogic
                 SelectionTournament();
                 SetFitnesses();
                 SortNets();
+
+                if (saveLastNets)
+                {
+                    SaveAllToFile();
+                }
 
                 GenerateNextGeneration();
                 MutatePopulation();

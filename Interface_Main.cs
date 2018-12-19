@@ -10,6 +10,7 @@ namespace Interface
             UCIProtocol.engine = engine;
             UCIProtocol.InputLoop();
 
+
             /*
             Position a = new Position();
 
