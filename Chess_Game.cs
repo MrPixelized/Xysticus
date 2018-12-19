@@ -1,5 +1,6 @@
 using NNLogic;
 using System.Collections.Generic;
+using System;
 using System.Linq;
 using Interface;
 using static Chess.Constants;
@@ -81,7 +82,11 @@ namespace Chess
                 }
                 moveHistory.Add(UCIProtocol.MoveToUCINotation(moveEvaluationTuple.Item1) + " ");
             }
-            System.IO.File.WriteAllLines("movehistory.pgn", moveHistory);
+        }
+        public void UpdateScores()
+        {
+            whitePlayer.score += (float)result;
+            blackPlayer.score += (float)(1.0f - result);
         }
     }
 }
