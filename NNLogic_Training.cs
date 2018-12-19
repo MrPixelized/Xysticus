@@ -50,8 +50,12 @@ namespace NNLogic
 
         public List<NeuralNetwork> InitializePopulation()
         {
-            List<NeuralNetwork> initialPopulation = new List<NeuralNetwork>();
-            for (int i = 0; i < populationSizeBeforeTrimming; i++)
+            List<NeuralNetwork> initialPopulation = new List<NeuralNetwork>
+            {
+                new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount,
+                filename: @"C:\Users\Gebruiker\Documents\School\_PWS\strongestnetwork_dec11.txt")
+            };
+            for (int i = initialPopulation.Count; i < populationSizeBeforeTrimming; i++)
             {
                 initialPopulation.Add(new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount));
             }
@@ -61,20 +65,30 @@ namespace NNLogic
         public void Train()
         {
             previousBest = population[0];
+            ClearFiles();
             while (true)
             {
+                if (generation % testFrequency == 0)
+                {
+                    SaveBestToFile();
+                }
                 generation += 1;
                 SelectionTournament();
                 SetFitnesses();
                 SortNets();
-                BestToFile();
-                if (generation % testFrequency == 0)
-                {
-                    CompareBestToPrevious();
-                }
+
                 GenerateNextGeneration();
                 MutatePopulation();
+                Console.WriteLine("Generation {0} has passed.", generation);
             }
+        }
+
+        public void ClearFiles()
+        {
+            Console.WriteLine("Please only continue if you want to delete the files nethistory.txt and movehistory.pgn");
+            Console.ReadLine();
+            System.IO.File.WriteAllText("nethistory.txt", "");
+            System.IO.File.WriteAllText("movehistory.pgn", "");
         }
 
         public void SelectionTournament()
@@ -132,9 +146,19 @@ namespace NNLogic
             }
         }
 
-        public void BestToFile()
+        public void SaveBestToFile()
         {
+            System.IO.File.AppendAllText("nethistory.txt", "Generation" + generation);
             System.IO.File.AppendAllText("nethistory.txt", population[0].ToString());
+        }
+
+        public void SaveAllToFile()
+        {
+            System.IO.File.WriteAllText("lastrunnetworks", "");
+            for (int i = 0; i < population.Count; i++)
+            {
+                System.IO.File.AppendAllText("lastrunnetworks", population.ToString());
+            }
         }
 
         public void CompareBestToPrevious()
@@ -196,16 +220,35 @@ namespace NNLogic
         public List<NeuralNetwork> RunRoundRobin(List<NeuralNetwork> nets)
         {
             // Return the strongest ceil(selectionFactor * nets.Count) nets
-            Console.WriteLine("\nNew round robin:\n");
+            Console.WriteLine("\nNew round robin");
 
-            Parallel.ForEach(GeneratePairings(nets), game =>
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            Parallel.ForEach(
+                GeneratePairings(nets),
+                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                game =>
+                {
+                    game.Play();
+                    game.UpdateScores();
+                    // ConsoleGraphics.WriteResult(game.whitePlayer, game.blackPlayer, (float)game.result);
+                    game.whitePlayer.games++; game.blackPlayer.games++;
+                }
+            );
+            /*
+            foreach (Game game in GeneratePairings(nets))
             {
                 game.Play();
                 game.whitePlayer.score += (float)game.result;
                 game.blackPlayer.score += 1.0f - (float)game.result;
                 ConsoleGraphics.WriteResult(game.whitePlayer, game.blackPlayer, (float)game.result);
                 game.whitePlayer.games++; game.blackPlayer.games++;
-            });
+                System.IO.File.WriteAllLines("movehistory.pgn", game.moveHistory);
+            }
+            */
+            sw.Stop();
+            int numberOfNets = nets.Count;
+            Console.WriteLine(sw.ElapsedMilliseconds / ((numberOfNets * (numberOfNets - 1)) / 2));
             
             foreach (NeuralNetwork net in nets)
             {
@@ -224,25 +267,12 @@ namespace NNLogic
             {
                 for (int j = i + 1; j < nets.Count; j++)
                 {
-                    Game game;
-                    if (i % 2 == j % 2)
+                    Game game = new Game
                     {
-                        game = new Game
-                        {
-                            whitePlayer = nets[i],
-                            blackPlayer = nets[j],
-                            engineDepth = engineDepth
-                        };
-                    }
-                    else
-                    {
-                        game = new Game
-                        {
-                            whitePlayer = nets[j],
-                            blackPlayer = nets[i],
-                            engineDepth = engineDepth
-                        };
-                    }
+                        whitePlayer = i % 2 == j % 2 ? nets[i] : nets[j],
+                        blackPlayer = i % 2 == j % 2 ? nets[j] : nets[i],
+                        engineDepth = engineDepth
+                    };
                     yield return game;
                 }
             }
