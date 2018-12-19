@@ -14,73 +14,13 @@ namespace Interface
     {
         static void Main()
         {
-            #region Parallel network computation speed 
-            /*
-            NeuralNetwork net = new NeuralNetwork(2, 790, 32, 1);
-            Stopwatch sw = new Stopwatch();
-            int totalTime = 0;
-            sw.Start();
-            for (int i = 0; i < 1000; i++) {
-                net.EvaluatePosition(new Position());
-                sw.Stop();
-                totalTime += (int)sw.ElapsedMilliseconds;
-            }
-            Console.WriteLine(totalTime);
-            Console.Read();
-            */
-            #endregion
-
-            #region Testing strongest network from Dec 11 run
-            
-            NeuralNetwork net = new NeuralNetwork(2, 790, 32, 1, filename: @"C:\Users\Gebruiker\Documents\School\_PWS\strongestnetwork_dec11.txt");
-            NeuralNetwork randomNet;
-            Parallel.For(0, 80, new ParallelOptions { MaxDegreeOfParallelism = 3 }, i =>
-            {
-                randomNet = new NeuralNetwork(2, 790, 32, 1);
-                Game game = new Game
-                {
-                    whitePlayer = i % 2 == 0 ? net : randomNet,
-                    blackPlayer = i % 2 == 0 ? randomNet : net,
-                    engineDepth = 0
-                };
-                game.Play();
-                game.UpdateScores();
-                ConsoleGraphics.WriteResult(game.whitePlayer, game.blackPlayer, (float)game.result);
-            });
-            Console.WriteLine(net.totalScore);
-
-            #endregion
-
-            #region Testing strongest network from Dec 10 run
-            /*
-            NeuralNetwork net = new NeuralNetwork(2, 790, 32, 1, filename: @"C:\Users\Gebruiker\Documents\School\_PWS\strongestnetwork.txt");
-            for (int i = 0; i < 30; i++)
-            {
-                NeuralNetwork randomNet = new NeuralNetwork(2, 790, 32, 1);
-                Game game = new Game
-                {
-                    whitePlayer = i % 2 == 0 ? net : randomNet,
-                    blackPlayer = i % 2 == 0 ? randomNet : net,
-                    engineDepth = 0
-                };
-                game.Play();
-                game.whitePlayer.score += (float)game.result;
-                game.blackPlayer.score += (float)(1.0f - game.result);
-                System.IO.File.WriteAllLines("movehistory.pgn", game.moveHistory);
-            }
-            Console.WriteLine(net.score / 30);
-            Console.ReadLine();
-            */
-            #endregion
-
             #region Total Training class testing
-            /*
             Training training = new Training(
                 reproductionOrganismCount: 2,
-                maxGroupSize: 16,
+                maxGroupSize: 14,
                 selectionFactor: 0.5f,
-                populationSizeBeforeTrimming: 64,
-                populationSizeAfterTrimming: 16,
+                populationSizeBeforeTrimming: 112,
+                populationSizeAfterTrimming: 14,
                 hiddenLayerCount: 2,
                 inputNodeCount: 790,
                 hiddenNodeCount: 32,
@@ -90,7 +30,6 @@ namespace Interface
                 engineDepth: 0
             );
             training.Train();
-            */
             #endregion
 
             #region Weight initialization testing

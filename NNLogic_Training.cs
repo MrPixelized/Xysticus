@@ -22,6 +22,7 @@ namespace NNLogic
         readonly float mutationRate;
         readonly int testFrequency;
         readonly int engineDepth;
+        readonly bool saveLastNets;
         public List<NeuralNetwork> population;
         int generation;
         NeuralNetwork previousBest;
@@ -44,17 +45,14 @@ namespace NNLogic
             this.mutationRate = mutationRate;
             this.testFrequency = testFrequency;
             this.engineDepth = engineDepth;
+            this.saveLastNets = saveLastNets;
             this.population = population ?? InitializePopulation();
             random = new Random();
         }
 
         public List<NeuralNetwork> InitializePopulation()
         {
-            List<NeuralNetwork> initialPopulation = new List<NeuralNetwork>
-            {
-                new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount,
-                filename: @"C:\Users\Gebruiker\Documents\School\_PWS\strongestnetwork_dec11.txt")
-            };
+            List<NeuralNetwork> initialPopulation = new List<NeuralNetwork> { };
             for (int i = initialPopulation.Count; i < populationSizeBeforeTrimming; i++)
             {
                 initialPopulation.Add(new NeuralNetwork(hiddenLayerCount, inputNodeCount, hiddenNodeCount, outputNodeCount));
@@ -231,7 +229,7 @@ namespace NNLogic
             sw.Start();
             Parallel.ForEach(
                 GeneratePairings(nets),
-                new ParallelOptions { MaxDegreeOfParallelism = 4 },
+                new ParallelOptions { MaxDegreeOfParallelism = 6 },
                 game =>
                 {
                     game.Play();
