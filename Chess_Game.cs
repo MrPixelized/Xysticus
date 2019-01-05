@@ -31,7 +31,8 @@ namespace Chess
                 if (currentPosition.toMove == WHITE)
                 {
                     // Make the white player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(ref whitePlayer, currentPosition, nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
+                    moveEvaluationTuple = Engine.FindBestMove(whitePlayer.EvaluatePosition, currentPosition, 
+                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
@@ -57,7 +58,8 @@ namespace Chess
                 else
                 {
                     // Make the black player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(ref blackPlayer, currentPosition, nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
+                    moveEvaluationTuple = Engine.FindBestMove(blackPlayer.EvaluatePosition, currentPosition, 
+                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
                     currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
