@@ -1,6 +1,7 @@
 using System;
 using Chess;
 using NNLogic;
+using static Interface.Constants;
 
 namespace Interface
 {
@@ -16,22 +17,22 @@ namespace Interface
         }
         private static string ConstructTopLine()
         {
-            string topLine = Constants.BORDER_GRAPHICS("top left corner");
+            string topLine = BORDER_GRAPHICS("top left corner");
             for (sbyte i = 0; i < 7; i++)
             {
-                topLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("top split edge");
+                topLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("top split edge");
             }
-            topLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("top right corner") + "\n";
+            topLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("top right corner") + "\n";
             return topLine;
         }
         private static string ConstructMiddleLine()
         {
-            string middleLine = Constants.BORDER_GRAPHICS("left split edge");
+            string middleLine = BORDER_GRAPHICS("left split edge");
             for (sbyte i = 0; i < 7; i++)
             {
-                middleLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("crosspoint");
+                middleLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("crosspoint");
             }
-            middleLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("right split edge") + "\n";
+            middleLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("right split edge") + "\n";
             return middleLine;
         }
         private static string ConstructMiddlePart(int[,] board)
@@ -41,9 +42,9 @@ namespace Interface
             {
                 for (sbyte j = 0; j < 8; j++)
                 {
-                    middlePart += Constants.BORDER_GRAPHICS("vertical") + Constants.PIECE_REPRESENTATIONS(board[j, i]);
+                    middlePart += BORDER_GRAPHICS("vertical") + PIECE_REPRESENTATIONS(board[j, i]);
                 }
-                middlePart += Constants.BORDER_GRAPHICS("vertical") + "\n";
+                middlePart += BORDER_GRAPHICS("vertical") + "\n";
                 if (!(i == 7))
                 {
                     middlePart += ConstructMiddleLine();
@@ -53,21 +54,22 @@ namespace Interface
         }
         private static string ConstructBottomLine()
         {
-            string bottomLine = Constants.BORDER_GRAPHICS("bottom left corner");
+            string bottomLine = BORDER_GRAPHICS("bottom left corner");
             for (sbyte i = 0; i < 7; i++)
             {
-                bottomLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("bottom split edge");
+                bottomLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("bottom split edge");
             }
-            bottomLine += Constants.BORDER_GRAPHICS("horizontal") + Constants.BORDER_GRAPHICS("bottom right corner");
+            bottomLine += BORDER_GRAPHICS("horizontal") + BORDER_GRAPHICS("bottom right corner");
             return bottomLine;
         }
         public static void WriteResult(NeuralNetwork white, NeuralNetwork black, float result)
         {
-            Console.WriteLine(string.Format("{0,-18} {1,3} - {2,-3} {3,18}",
-                string.Format("Net {0} ({1})", white.ID, white.score),
+            Console.Write(string.Format("\n{0,-12} {1,3} - {2,-3} {3,12}",
+                string.Format("Net {0}", white.ID),
                 result, 1 - result,
-                string.Format("Net {0} ({1})", black.ID, black.score)
+                string.Format("Net {0}", black.ID)
             ));
         }
     }
 }
+
