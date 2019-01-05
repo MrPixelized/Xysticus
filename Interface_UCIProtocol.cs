@@ -5,13 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using static Interface.Constants;
-using NNLogic;
 
 namespace Interface
 {
     public class UCIProtocol
     {
-        public static NeuralNetwork evaluationFunction;
+        public static Func<Position, float> evaluationFunction;
         public static Position currentPosition;
 
         public static string MoveToUCINotation(Move move)
@@ -127,7 +126,8 @@ namespace Interface
                     depth = int.Parse(inputStringArray[i + 1]);
                 }
             }
-            (Move, float) moveEvaluationTuple = Engine.FindBestMove(ref evaluationFunction, currentPosition, depth);
+            (Move, float) moveEvaluationTuple = Engine.FindBestMove(evaluationFunction, 
+                currentPosition, depth);
             String moveString = MoveToUCINotation(moveEvaluationTuple.Item1);
             Console.WriteLine("info depth " + depth + " score cp " + 
                 (int)(moveEvaluationTuple.Item2 * 100 * currentPosition.toMove) + " pv " + moveString);
