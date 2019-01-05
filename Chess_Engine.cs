@@ -8,7 +8,8 @@ namespace Chess
 {
     public static class Engine
     {
-        public static (Move, float) FindBestMove(ref NeuralNetwork evaluationFunction, Position currentPosition, List<(Position, Move)> positionMoveTupleList, int depth, float alpha, float beta)
+        public static (Move, float) FindBestMove(Func<Position, float> evaluationFunction, Position currentPosition, 
+            List<(Position, Move)> positionMoveTupleList, int depth, float alpha, float beta)
         {
             List<(Move, float)> moveEvaluationTupleList = new List<(Move, float)>();
             List<(Position, Move)> nextPositionMoveTupleList;
@@ -32,7 +33,7 @@ namespace Chess
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         // After the most recent legal move, there are no pseudo-legal moves and the game has ended.
-                        moveEvaluationTupleList.Add((move, evaluationFunction.EvaluatePosition(position)));
+                        moveEvaluationTupleList.Add((move, evaluationFunction(position)));
                         lastMoveWasLegal = true;
                         }
                     else if (nextPositionMoveTupleList.Last().Item1 != null)
@@ -41,11 +42,11 @@ namespace Chess
                         lastMoveWasLegal = true;
                         if (depth == 0)
                         {
-                            moveEvaluationTupleList.Add((move, evaluationFunction.EvaluatePosition(position)));
+                            moveEvaluationTupleList.Add((move, evaluationFunction(position)));
                         }
                         else
                         {
-                            moveEvaluationTupleList.Add((move, FindBestMove(ref evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            moveEvaluationTupleList.Add((move, FindBestMove(evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
                         }
                     }
                     // MINIMAX
@@ -60,7 +61,7 @@ namespace Chess
                 {
                     // This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
                     // In this case, it's safe to return a random move and the evaluation for the final position.
-                    return (positionMoveTupleList.Last().Item2, evaluationFunction.EvaluatePosition(currentPosition));
+                    return (positionMoveTupleList.Last().Item2, evaluationFunction(currentPosition));
                 }
                 moveEvaluationTupleList.Sort((x, y) => y.Item2.CompareTo(x.Item2));
             }
@@ -81,18 +82,18 @@ namespace Chess
                     if (nextPositionMoveTupleList.Count == 0)
                     {
                         // After the most recent legal move, there are no pseudo-legal moves and the game has ended. 
-                        moveEvaluationTupleList.Add((move, evaluationFunction.EvaluatePosition(position)));
+                        moveEvaluationTupleList.Add((move, evaluationFunction(position)));
                     }
                     else if (nextPositionMoveTupleList.Last().Item1 != null)
                     // The pseudo-legal move we're investigating does not allow a king to be captured. 
                     {
                         if (depth == 0)
                         {
-                            moveEvaluationTupleList.Add((move, evaluationFunction.EvaluatePosition(position)));
+                            moveEvaluationTupleList.Add((move, evaluationFunction(position)));
                         }
                         else
                         {
-                            moveEvaluationTupleList.Add((move, FindBestMove(ref evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
+                            moveEvaluationTupleList.Add((move, FindBestMove(evaluationFunction, position, nextPositionMoveTupleList, depth - 1, alpha, beta).Item2));
                         }                        
                     }
                     // MINIMAX
@@ -107,16 +108,17 @@ namespace Chess
                 {
                     // This only occurs when we're in a position where there are pseudo-legal moves, but no legal moves.
                     // In this case, it's safe to return a random move and the evaluation for the final position.
-                    return (positionMoveTupleList.Last().Item2, evaluationFunction.EvaluatePosition(currentPosition));
+                    return (positionMoveTupleList.Last().Item2, evaluationFunction(currentPosition));
                 }
                 moveEvaluationTupleList.Sort((x, y) => x.Item2.CompareTo(y.Item2));
             }
             return moveEvaluationTupleList[0];
         }
-        public static (Move, float) FindBestMove(ref NeuralNetwork evaluationFunction, Position currentPosition, int depth)
+        public static (Move, float) FindBestMove(Func<Position, float> evaluationFunction, Position currentPosition, 
+            int depth)
         {
             List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
-            return FindBestMove(ref evaluationFunction, currentPosition, nextPositionMoveTupleList, depth, -2.0f, 2.0f);
+            return FindBestMove(evaluationFunction, currentPosition, nextPositionMoveTupleList, depth, -2.0f, 2.0f);
         }
     }
 }
