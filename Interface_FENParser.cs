@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Chess;
+using static Interface.Constants;
 
 namespace Interface
 {
@@ -41,7 +42,7 @@ namespace Interface
                     }
                     else
                     {
-                        board[rankNumber, fileNumber] = Constants.INVERSED_PIECE_REPRESENTATIONS(character);
+                        board[rankNumber, fileNumber] = INVERSED_PIECE_REPRESENTATIONS(character);
                         fileNumber++;
                     }
                 }
@@ -77,7 +78,7 @@ namespace Interface
             Tuple<int, int> enPassantSquare;
 
             if (!(enPassantSquareString == "-")) {
-                enPassantSquare = new Tuple<int, int>(Constants.COORDINATE_TRANSFORMATION(enPassantSquareString[0]), 8 - (int)Char.GetNumericValue(enPassantSquareString[1]));
+                enPassantSquare = new Tuple<int, int>(COORDINATE_TRANSFORMATION(enPassantSquareString[0]), 8 - (int)Char.GetNumericValue(enPassantSquareString[1]));
             }
             else
             {
@@ -101,6 +102,10 @@ namespace Interface
             Tuple<int, int> enPassantSquare = ParseEnPassantSquare(FENStringArray[3]);
             int fiftyMoveProximity = ParseFiftyMoveProximity(FENStringArray[4]);
             return new Position(board, toMove, fiftyMoveProximity, castlingRights, enPassantSquare);
+        }
+        public static Position ParseFEN(string FENString)
+        {
+            return ParseFEN(FENString.Split(' '));
         }
         #endregion
     }
