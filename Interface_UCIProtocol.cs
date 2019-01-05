@@ -93,7 +93,14 @@ namespace Interface
         {
             Position gamePosition = currentPosition;
             ConsoleGraphics.DrawPosition(gamePosition);
-            Console.WriteLine(String.Format("To move: {0}\nCastling rights: {0}\nEn passant square: {1}\nFifty move proxmity: {2}", gamePosition.toMove, gamePosition.castlingRights, gamePosition.enPassantSquare, gamePosition.fiftyMoveProximity));
+            Console.WriteLine(string.Format("To move: {0}\nEn passant square: {1}\nFifty move proxmity: {2}", 
+                gamePosition.toMove, gamePosition.enPassantSquare, gamePosition.fiftyMoveProximity));
+            Console.Write("Castling rights: ");
+            foreach (bool castlingRight in gamePosition.castlingRights)
+            {
+                Console.Write(castlingRight + " ");
+            }
+            Console.WriteLine();
         }
         private static void InputQuit()
         {
