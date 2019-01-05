@@ -185,7 +185,7 @@ namespace Interface
             string[] userInput = Console.ReadLine().Split(' ');
             if (userInput[0] == "uci")
             {
-                UCIProtocol.evaluationFunction = net;
+                UCIProtocol.evaluationFunction = net.EvaluatePosition;
                 UCIProtocol.InputLoop();
             }
             */
