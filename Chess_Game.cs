@@ -83,10 +83,5 @@ namespace Chess
                 moveHistory.Add(UCIProtocol.MoveToUCINotation(moveEvaluationTuple.Item1) + " ");
             }
         }
-        public void UpdateScores()
-        {
-            whitePlayer.score += (float)result;
-            blackPlayer.score += (float)(1.0f - result);
-        }
     }
 }
