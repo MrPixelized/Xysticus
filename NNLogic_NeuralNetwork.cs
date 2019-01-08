@@ -23,7 +23,7 @@ namespace NNLogic
         public readonly int outputNodeCount;
 
         public NeuralNetwork(int hiddenLayerCount, int inputNodeCount, int hiddenNodeCount, int outputNodeCount,
-            float[][] weights = null, string filename = "")
+            float[][] weights = null, string filename = null, string weightsFileString = null)
         {
             networksCreated++;
             ID = networksCreated;
@@ -31,62 +31,50 @@ namespace NNLogic
             this.inputNodeCount = inputNodeCount;
             this.hiddenNodeCount = hiddenNodeCount;
             this.outputNodeCount = outputNodeCount;
-            if (filename != "")
-            {
-                string contents = File.ReadAllText(filename).Replace("{", "");
-                string[] weightString = contents.Split('}');
-                weightString = weightString.Take(weightString.Length - 2).ToArray();
-                string[][] weightStringArray = new string[weightString.Length][];
-                for (int i = 0; i < weightString.Length; i++)
-                {
-                    weightStringArray[i] = weightString[i].Split(' ');
-                }
-                float[][] netWeights = new float[weightStringArray.Length][];
-                for (int i = 0; i < weightStringArray.Length; i++)
-                {
-                    netWeights[i] = new float[weightStringArray[i].Length];
-                    for (int j = 0; j < weightStringArray[i].Length; j++)
-                    {
-                        netWeights[i][j] = float.Parse(weightStringArray[i][j]);
-                    }
-                }
-                weights = netWeights;
-            }
-            if (weights == null)
-            {
-                this.weights = new float[hiddenLayerCount + 1][];
-                _initweights();
-            }
-            else
+            if (weights != null)
             {
                 this.weights = weights;
             }
+            else if (filename != null)
+            {
+                this.weights = _stringtoweights(File.ReadAllText(filename));
+            }
+            else if (weightsFileString != null)
+            {
+                this.weights = _stringtoweights(weightsFileString);
+            }
+            else
+            {
+                this.weights = _initweights();
+            }
         }
 
-        private void _initweights()
+        private float[][] _initweights()
         {
             Random random = new Random();
-            weights[0] = new float[(inputNodeCount + 1) * hiddenNodeCount];
+            float[][] netWeights = new float[hiddenLayerCount + 1][];
+            netWeights[0] = new float[(inputNodeCount + 1) * hiddenNodeCount];
             for (int i = 0; i < (inputNodeCount + 1) * hiddenNodeCount; i++)
             {
-                weights[0][i] = _generateweight(ref random, inputNodeCount);
+                netWeights[0][i] = _generateweight(ref random, inputNodeCount);
 
             }
             for (int i = 0; i < hiddenLayerCount - 1; i++)
             {
-                weights[i + 1] = new float[(hiddenNodeCount + 1) * hiddenNodeCount];
+                netWeights[i + 1] = new float[(hiddenNodeCount + 1) * hiddenNodeCount];
                 for (int j = 0; j < (hiddenNodeCount + 1) * hiddenNodeCount; j++)
                 {
-                    weights[i + 1][j] = _generateweight(ref random, hiddenNodeCount);
+                    netWeights[i + 1][j] = _generateweight(ref random, hiddenNodeCount);
                 }
             }
-            weights[hiddenLayerCount] = new float[(hiddenNodeCount + 1) * outputNodeCount];
+            netWeights[hiddenLayerCount] = new float[(hiddenNodeCount + 1) * outputNodeCount];
             for (int i = 0; i < (hiddenNodeCount + 1) * outputNodeCount; i++)
             {
-                weights[hiddenLayerCount][i] = _generateweight(ref random, hiddenNodeCount);
+                netWeights[hiddenLayerCount][i] = _generateweight(ref random, hiddenNodeCount);
             }
+            return netWeights;
         }
-        private float _generateweight(ref Random random, int layerInputNodes)
+        public float _generateweight(ref Random random, int layerInputNodes)
         {
             double u1 = 1.0 - random.NextDouble();
             double u2 = 1.0 - random.NextDouble();
@@ -139,6 +127,7 @@ namespace NNLogic
             networkInput[12 * 64 + 16 + 4] = position.toMove;
             // Set the fifty move proximity
             networkInput[12 * 64 + 16 + 4 + 1] = position.fiftyMoveProximity;
+            return CalculateResult(networkInput)[0];
             return _sigmoid(CalculateResult(networkInput)[0]);
         }
         public float[] CalculateResult(float[] activations)
@@ -171,15 +160,33 @@ namespace NNLogic
                 // Add the bias
                 nextActivations[i] += weights[layer - 1][(i + 1) * (previousLayerNodeCount + 1) - 1];
                 // Apply the activation function
-                nextActivations[i] = _activation(nextActivations[i]);
+                nextActivations[i] = _sigmoid(nextActivations[i]);
             }
 
             return nextActivations;
         }
-        private float _activation(float activation)
+
+        private float[][] _stringtoweights(string contents)
         {
-            return Math.Max(activation, 0);
+            string[] weightString = contents.Replace("{", "").Split('}');
+            weightString = weightString.Take(weightString.Length - 2).ToArray();
+            string[][] weightStringArray = new string[weightString.Length][];
+            for (int i = 0; i < weightString.Length; i++)
+            {
+                weightStringArray[i] = weightString[i].Split(' ');
+            }
+            float[][] netWeights = new float[weightStringArray.Length][];
+            for (int i = 0; i < weightStringArray.Length; i++)
+            {
+                netWeights[i] = new float[weightStringArray[i].Length];
+                for (int j = 0; j < weightStringArray[i].Length; j++)
+                {
+                    netWeights[i][j] = float.Parse(weightStringArray[i][j]);
+                }
+            }
+            return netWeights;
         }
+
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
