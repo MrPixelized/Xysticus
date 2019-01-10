@@ -2,6 +2,7 @@ using NNLogic;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Text;
 using Interface;
 using static Chess.Constants;
 
@@ -16,24 +17,25 @@ namespace Chess
         public bool isCheck;
         public float? result;
         public int engineDepth;
+        public bool storeGame;
 
         public Game(Position startingPosition = null)
         {
             currentPosition = startingPosition ?? new Position();
-            moveHistory = new List<string>();
+            if (storeGame) moveHistory = new List<string>();
         }        
         public void Play()
         {
-            (Move, float) moveEvaluationTuple;
+            Move bestMove;
             List<(Position, Move)> nextPositionMoveTupleList = currentPosition.GeneratePositions();
             while (result == null)
             {
                 if (currentPosition.toMove == WHITE)
                 {
                     // Make the white player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(whitePlayer.EvaluatePosition, currentPosition, 
-                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
-                    currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
+                    bestMove = Engine.FindBestMove(whitePlayer.EvaluatePosition, currentPosition, 
+                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f).Item1;
+                    currentPosition = currentPosition.MakeMove(bestMove);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
                         result = DRAW;
@@ -58,9 +60,9 @@ namespace Chess
                 else
                 {
                     // Make the black player find a move and apply it to the position.
-                    moveEvaluationTuple = Engine.FindBestMove(blackPlayer.EvaluatePosition, currentPosition, 
-                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f);
-                    currentPosition = currentPosition.MakeMove(moveEvaluationTuple.Item1);
+                    bestMove = Engine.FindBestMove(blackPlayer.EvaluatePosition, currentPosition, 
+                        nextPositionMoveTupleList, engineDepth, -2.0f, 2.0f).Item1;
+                    currentPosition = currentPosition.MakeMove(bestMove);
                     if (currentPosition.fiftyMoveProximity >= 100)
                     {
                         result = DRAW;
@@ -82,7 +84,23 @@ namespace Chess
                         isCheck = currentPosition.IsCheck();
                     }
                 }
-                moveHistory.Add(UCIProtocol.MoveToUCINotation(moveEvaluationTuple.Item1) + " ");
+                if (storeGame) moveHistory.Add(UCIProtocol.MoveToUCINotation(bestMove) + " ");
+            }
+        }
+        public override string ToString()
+        {
+            if (storeGame)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (string net in moveHistory)
+                {
+                    sb.Append(net + " ");
+                }
+                return sb.ToString();
+            }
+            else
+            {
+                return "Game not stored.";
             }
         }
     }
