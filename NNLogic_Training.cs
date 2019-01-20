@@ -23,6 +23,7 @@ namespace NNLogic
         readonly int testFrequency;
         readonly int engineDepth;
         readonly int maxParallelGames;
+        readonly int numberOfTestGames;
         public List<NeuralNetwork> population;
         int generation;
         NeuralNetwork previousBest;
@@ -31,7 +32,7 @@ namespace NNLogic
         public Training(int reproductionOrganismCount, int maxGroupSize, float selectionFactor,
             int populationSizeBeforeTrimming, int populationSizeAfterTrimming, int hiddenLayerCount,
             int inputNodeCount, int hiddenNodeCount, int outputNodeCount, float mutationRate, int testFrequency,
-            int engineDepth, int maxParallelGames, List<NeuralNetwork> population = null,
+            int engineDepth, int maxParallelGames, int numberOfTestGames, List<NeuralNetwork> population = null,
             string populationFile = null)
         {
             this.reproductionOrganismCount = reproductionOrganismCount;
@@ -47,6 +48,7 @@ namespace NNLogic
             this.testFrequency = testFrequency;
             this.engineDepth = engineDepth;
             this.maxParallelGames = maxParallelGames;
+            this.numberOfTestGames = numberOfTestGames;
             if (population != null)
             {
                 this.population = population;
@@ -232,11 +234,11 @@ namespace NNLogic
         public void CompareBestToRandom()
         {
             NeuralNetwork bestNet = population[0];
-            float[] gameResults = new float[10];
-            Parallel.For(0, 10, new ParallelOptions { MaxDegreeOfParallelism = maxParallelGames }, i =>
+            float[] gameResults = new float[numberOfTestGames];
+            NeuralNetwork randomNet;
+            Parallel.For(0, numberOfTestGames, new ParallelOptions { MaxDegreeOfParallelism = maxParallelGames }, i =>
             {
-                NeuralNetwork randomNet = new NeuralNetwork(hiddenLayerCount,
-                    inputNodeCount, hiddenNodeCount, outputNodeCount);
+                randomNet = new NeuralNetwork(2, 790, 32, 1);
                 Game game = new Game
                 {
                     whitePlayer = i % 2 == 0 ? bestNet : randomNet,
@@ -245,7 +247,9 @@ namespace NNLogic
                 game.Play();
                 gameResults[i] = i % 2 == 0 ? (float)game.result : (float)(1.0f - game.result);
             });
-            Console.WriteLine("Best net got " + gameResults.Sum() / 10 + " average score.");
+            Console.WriteLine(String.Format("Net gen {0}: {1}", generation, gameResults.Sum() / numberOfTestGames));
+            System.IO.File.AppendAllText(@"runresults.txt",
+                String.Format("Net gen {0}: {1}" + "\n", generation, gameResults.Sum() / numberOfTestGames));
         }
 
         public void GenerateNextGeneration()
@@ -272,7 +276,10 @@ namespace NNLogic
                 {
                     for (int i = 0; i < weightArray.Length; i++)
                     {
-                        weightArray[i] += (float)(random.NextDouble() * 2 - 1) * mutationRate;
+                        if (random.NextDouble() < mutationRate)
+                        {
+                            weightArray[i] = (float)random.NextDouble();
+                        }
                     }
                 }
             }
@@ -359,7 +366,7 @@ namespace NNLogic
             return recombinationList;
         }
 
-        private NeuralNetwork _crossover(List<NeuralNetwork> netsToCombine)
+        public NeuralNetwork _crossover(List<NeuralNetwork> netsToCombine)
         {
             // Takes a set number of networks and randomly combines them into one
             int numberOfNets = netsToCombine.Count();
