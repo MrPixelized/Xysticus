@@ -128,7 +128,6 @@ namespace NNLogic
             // Set the fifty move proximity
             networkInput[12 * 64 + 16 + 4 + 1] = position.fiftyMoveProximity;
             return CalculateResult(networkInput)[0];
-            return _sigmoid(CalculateResult(networkInput)[0]);
         }
         public float[] CalculateResult(float[] activations)
         {
